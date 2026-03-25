@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 // ── AUTH ROUTES ──
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthController; 
 
 // Guest only (belum login)
 Route::middleware('guest')->group(function () {
