@@ -41,7 +41,12 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('user.home'))->with('success', 'Login berhasil!');
+
+            if (Auth::user()->role === 'admin') {
+                return redirect('/admin/dashboard')->with('success', 'Login berhasil!');
+            }
+
+            return redirect()->route('user.home')->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors([

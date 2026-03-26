@@ -4,10 +4,11 @@ use Illuminate\Support\Facades\Route;
 
 // ── AUTH ROUTES ──
 use App\Http\Controllers\AuthController; 
+use Illuminate\Support\Facades\Auth;
 
 // Landing: guest sees login (default), authenticated user redirect to home.
 Route::get('/', function () {
-    return auth()->check()
+    return Auth::check()
         ? redirect()->route('user.home')
         : redirect()->route('login');
 });
@@ -57,3 +58,16 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
     // Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 });
+
+use App\Http\Controllers\admin\AdminRegisterController;
+
+Route::get('/register', [AdminRegisterController::class, 'showForm'])->name('admin.register');
+Route::post('/register', [AdminRegisterController::class, 'register']);
+
+// Register ADMIN (sekali, pakai AdminRegisterController)
+Route::get('/register', [AdminRegisterController::class, 'showForm'])->name('admin.register');
+Route::post('/register', [AdminRegisterController::class, 'register']);
+
+// Register USER BIASA (pakai AuthController)
+Route::get('/user/register', [AuthController::class, 'showRegister'])->name('user.register');
+Route::post('/user/register', [AuthController::class, 'register']);

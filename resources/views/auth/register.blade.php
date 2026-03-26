@@ -22,7 +22,7 @@
     <!-- CARD -->
     <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl -mt-6">
 
-        <form method="POST" action="/register" class="space-y-3">
+        <form method="POST" action="/user/register" class="space-y-3">
             @csrf
 
             <input type="text" name="name" placeholder="Nama Lengkap"

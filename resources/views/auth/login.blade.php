@@ -46,7 +46,7 @@
         </form>
 
         <p class="text-sm text-white/80 mt-4">
-            Belum punya akun? <a href="/register" class="text-white underline hover:text-white/90">Daftar di sini</a>
+            Belum punya akun? <a href="/user/register" class="text-white underline hover:text-white/90">Daftar di sini</a>
         </p>
 
     </div>
