@@ -14,7 +14,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'id_users';
+    // Gunakan primary key default 'id' sesuai migrasi users table.
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.

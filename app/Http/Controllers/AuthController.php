@@ -28,7 +28,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/dashboard')->with('success', 'Registrasi berhasil!');
+        return redirect()->route('user.home')->with('success', 'Registrasi berhasil!');
     }
 
     // ── LOGIN ──
@@ -41,7 +41,7 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard')->with('success', 'Login berhasil!');
+            return redirect()->intended(route('user.home'))->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors([
@@ -61,11 +61,19 @@ class AuthController extends Controller
     // ── SHOW FORMS ──
     public function showLogin()
     {
+        if (Auth::check()) {
+            return redirect()->route('user.home');
+        }
+
         return view('auth.login');
     }
 
     public function showRegister()
     {
+        if (Auth::check()) {
+            return redirect()->route('user.home');
+        }
+
         return view('auth.register');
     }
 }

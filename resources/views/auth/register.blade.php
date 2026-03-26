@@ -55,7 +55,7 @@
 
         <p class="text-xs text-white/70 mt-4">
             Sudah punya akun?
-            <a href="/?" class="underline">
+            <a href="/login" class="underline">
                 Login
             </a>
         </p>
