@@ -15,7 +15,7 @@
                 <div class="card-body text-center position-relative">
 
                     <img src="{{ auth()->user()->photo 
-                        ? asset('uploads/profile/' . auth()->user()->photo) 
+                        ? asset('storage/profile/' . auth()->user()->photo)
                         : asset('assets/images/profile/user-1.jpg') }}"
                         class="rounded-circle border border-4 border-white shadow"
                         width="120"
