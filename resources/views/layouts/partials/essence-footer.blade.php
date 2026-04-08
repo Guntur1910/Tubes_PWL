@@ -7,7 +7,8 @@
                 <div class="single_widget_area d-flex mb-30">
                     <div class="footer-logo mr-50">
                         <a href="{{ route('user.home') }}">
-                            <img src="{{ asset('essence/img/core-img/logo2.png') }}" alt="{{ config('app.name') }}">
+                            <h1>GIGS</h1>
+                            {{-- <img src="{{ asset('essence/img/core-img/logo2.png') }}" alt="{{ config('app.name') }}"> --}}
                         </a>
                     </div>
                     <div class="footer_menu">

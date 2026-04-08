@@ -6,7 +6,8 @@
 
             <!-- Logo -->
             <a class="nav-brand" href="{{ route('user.home') }}">
-                <img src="{{ asset('essence/img/core-img/logo.png') }}" alt="{{ config('app.name') }}">
+                <h1>GIGS</h1>
+                {{-- <img src="{{ asset('essence/img/core-img/logo.png') }}" alt="{{ config('app.name') }}"> --}}
             </a>
 
             <!-- Navbar Toggler -->
@@ -41,7 +42,7 @@
             <div class="search-area">
                 <form action="{{ route('user.shop') }}" method="GET">
                     <input type="search" name="search" id="headerSearch"
-                        placeholder="Cari produk..."
+                        placeholder="Cari konser..."
                         value="{{ request('search') }}">
                     <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
                 </form>
