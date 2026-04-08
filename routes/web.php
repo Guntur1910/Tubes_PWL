@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminRegisterController;
 use App\Http\Controllers\User\HomeController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,4 +72,15 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
     Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
     Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
 
+});
+/*
+|--------------------------------------------------------------------------
+| Profile ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });

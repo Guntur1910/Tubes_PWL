@@ -62,7 +62,7 @@
                         <div class="dropdown-menu dropdown-menu-right">
                             <span class="dropdown-item-text">{{ auth()->user()->name }}</span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Profil Saya</a>
+                            <a class="dropdown-item" href="{{ route('profile') }}">Profil Saya</a>                            
                             <a class="dropdown-item" href="#">Pesanan Saya</a>
                             <div class="dropdown-divider"></div>
                             <form method="POST" action="{{ route('logout') }}">

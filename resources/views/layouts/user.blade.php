@@ -14,6 +14,7 @@
     {{-- CSS Template Essence --}}
     <link rel="stylesheet" href="{{ asset('essence/css/core-style.css') }}">
     <link rel="stylesheet" href="{{ asset('essence/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
 
     @stack('styles')
 </head>
@@ -39,8 +40,10 @@
     <script src="{{ asset('essence/js/plugins.js') }}"></script>
     <script src="{{ asset('essence/js/classy-nav.min.js') }}"></script>
     <script src="{{ asset('essence/js/active.js') }}"></script>
-
     @stack('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    @yield('scripts')
 </body>
 
 </html>

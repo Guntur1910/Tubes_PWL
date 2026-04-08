@@ -12,7 +12,7 @@
 
     <!-- TITLE -->
     <h1 class="text-2xl font-semibold mb-2">
-        Buat Akun Baru
+        Busat Akun Baru
     </h1>
 
     <p class="text-sm text-white/80 mb-8">

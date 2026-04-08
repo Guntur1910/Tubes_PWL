@@ -41,7 +41,6 @@
                                 <small class="text-muted">{{ auth()->user()->email ?? '' }}</small>
                             </div>
                             <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                                <i class="ti ti-user fs-6"></i>
                                 <p class="mb-0 fs-3">My Profile</p>
                             </a>
                             <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
