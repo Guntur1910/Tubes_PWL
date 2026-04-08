@@ -1,180 +1,182 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard')
+@section('title', 'Admin Dashboard')
 
 @section('content')
+<div class="container-fluid">
 
-{{-- ===== ROW 1: Chart + Stats ===== --}}
-<div class="row">
-
-    {{-- Sales Overview Chart --}}
-    <div class="col-lg-8">
-        <div class="card w-100">
-            <div class="card-body">
-                <div class="d-md-flex align-items-center">
-                    <div>
-                        <h4 class="card-title">Sales Overview</h4>
-                        <p class="card-subtitle">Statistik penjualan</p>
-                    </div>
-                    <div class="ms-auto">
-                        <ul class="list-unstyled mb-0">
-                            <li class="list-inline-item text-primary">
-                                <span class="round-8 text-bg-primary rounded-circle me-1 d-inline-block"></span>
-                                Produk A
-                            </li>
-                            <li class="list-inline-item text-info">
-                                <span class="round-8 text-bg-info rounded-circle me-1 d-inline-block"></span>
-                                Produk B
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div id="sales-overview" class="mt-4 mx-n6"></div>
-            </div>
-        </div>
+    <!-- Page Heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Dashboard - Event Management System</h1>
     </div>
 
-    {{-- Weekly Stats --}}
-    <div class="col-lg-4">
-        <div class="card overflow-hidden">
-            <div class="card-body pb-0">
-                <h4 class="card-title">Weekly Stats</h4>
-                <p class="card-subtitle">Rata-rata penjualan</p>
+    <!-- ===================== SUMMARY CARDS ===================== -->
+    <div class="row">
 
-                <div class="mt-4 pb-3 d-flex align-items-center">
-                    <span class="btn btn-primary rounded-circle round-48 hstack justify-content-center">
-                        <i class="ti ti-shopping-cart fs-6"></i>
-                    </span>
-                    <div class="ms-3">
-                        <h5 class="mb-0 fw-bolder fs-4">Top Sales</h5>
-                        <span class="text-muted fs-3">{{ $topSales ?? 'Belum ada data' }}</span>
-                    </div>
-                    <div class="ms-auto">
-                        <span class="badge bg-secondary-subtle text-muted">+68%</span>
-                    </div>
+        <!-- Total Event -->
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>{{ $totalEvent }}</h3>
+                    <p>Total Events</p>
                 </div>
-
-                <div class="py-3 d-flex align-items-center">
-                    <span class="btn btn-warning rounded-circle round-48 hstack justify-content-center">
-                        <i class="ti ti-star fs-6"></i>
-                    </span>
-                    <div class="ms-3">
-                        <h5 class="mb-0 fw-bolder fs-4">Best Seller</h5>
-                        <span class="text-muted fs-3">{{ $bestSeller ?? 'Belum ada data' }}</span>
-                    </div>
-                    <div class="ms-auto">
-                        <span class="badge bg-secondary-subtle text-muted">+45%</span>
-                    </div>
-                </div>
-
-                <div class="py-3 d-flex align-items-center">
-                    <span class="btn btn-success rounded-circle round-48 hstack justify-content-center">
-                        <i class="ti ti-message-dots fs-6"></i>
-                    </span>
-                    <div class="ms-3">
-                        <h5 class="mb-0 fw-bolder fs-4">Most Commented</h5>
-                        <span class="text-muted fs-3">{{ $mostCommented ?? 'Belum ada data' }}</span>
-                    </div>
-                    <div class="ms-auto">
-                        <span class="badge bg-secondary-subtle text-muted">+30%</span>
-                    </div>
+                <div class="icon">
+                    <i class="fas fa-calendar"></i>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- ===== Tabel Products Performance ===== --}}
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-md-flex align-items-center">
-                    <div>
-                        <h4 class="card-title">Products Performance</h4>
-                        <p class="card-subtitle">Data performa produk</p>
-                    </div>
+        <!-- Total Tickets Sold -->
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>{{ $totalTicketSold }}</h3>
+                    <p>Tickets Sold</p>
                 </div>
-                <div class="table-responsive mt-4">
-                    <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
-                        <thead>
-                            <tr>
-                                <th class="px-0 text-muted">Assigned</th>
-                                <th class="px-0 text-muted">Name</th>
-                                <th class="px-0 text-muted">Priority</th>
-                                <th class="px-0 text-muted text-end">Budget</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{-- Jika ada data dari controller --}}
-                            @forelse($products ?? [] as $product)
-                            <tr>
-                                <td class="px-0">
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ asset('assets/images/profile/user-3.jpg') }}"
-                                            class="rounded-circle" width="40" alt="user" />
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 fw-bolder">{{ $product->user->name }}</h6>
-                                            <span class="text-muted">{{ $product->user->role }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-0">{{ $product->name }}</td>
-                                <td class="px-0">
-                                    <span class="badge bg-{{ $product->priority_color }}">
-                                        {{ $product->priority }}
-                                    </span>
-                                </td>
-                                <td class="px-0 text-dark fw-medium text-end">{{ $product->budget }}</td>
-                            </tr>
-                            @empty
-                            {{-- Data dummy jika belum ada data dari database --}}
-                            <tr>
-                                <td class="px-0">
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ asset('assets/images/profile/user-3.jpg') }}"
-                                            class="rounded-circle" width="40" alt="user" />
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 fw-bolder">Sunil Joshi</h6>
-                                            <span class="text-muted">Web Designer</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-0">Elite Admin</td>
-                                <td class="px-0"><span class="badge bg-info">Low</span></td>
-                                <td class="px-0 text-dark fw-medium text-end">$3.9K</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="icon">
+                    <i class="fas fa-ticket-alt"></i>
                 </div>
             </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>Rp {{ number_format($totalRevenue,0,',','.') }}</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Users -->
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>{{ $totalUser }}</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================== CHART ===================== -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Monthly Revenue</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="revenueChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- ===================== LATEST EVENTS ===================== -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Latest Events</h3>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Quota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($latestEvents as $event)
+                        <tr>
+                            <td>{{ $event->name }}</td>
+                            <td>{{ $event->date }}</td>
+                            <td>{{ $event->location }}</td>
+                            <td>{{ $event->quota }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center">No events available</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================== LATEST TRANSACTIONS ===================== -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Latest Transactions</h3>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>User</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($latestTransactions as $trx)
+                        <tr>
+                            <td>{{ $trx->invoice_number }}</td>
+                            <td>{{ $trx->user->name ?? '-' }}</td>
+                            <td>Rp {{ number_format($trx->total_amount,0,',','.') }}</td>
+                            <td>
+                                @if($trx->status == 'pending')
+                                    <span class="badge badge-warning">Pending</span>
+                                @elseif($trx->status == 'paid')
+                                    <span class="badge badge-success">Paid</span>
+                                @else
+                                    <span class="badge badge-danger">Failed</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center">No transactions available</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
-
 @endsection
 
-@push('scripts')
-<script>
-    // Contoh chart ApexCharts - sesuaikan dengan data dari controller
-    var options = {
-        series: [{
-            name: 'Produk A',
-            data: [31, 40, 28, 51, 42, 109, 100]
-        }, {
-            name: 'Produk B',
-            data: [11, 32, 45, 32, 34, 52, 41]
-        }],
-        chart: { type: 'area', height: 350, toolbar: { show: false } },
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
-        },
-        colors: ['#1e4db7', '#0bb2fb'],
-        stroke: { curve: 'smooth' },
-        fill: { type: 'gradient' }
-    };
 
-    var chart = new ApexCharts(document.querySelector("#sales-overview"), options);
-    chart.render();
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode($monthlyLabels ?? []) !!},
+            datasets: [{
+                label: 'Revenue',
+                data: {!! json_encode($monthlyRevenue ?? []) !!},
+                borderWidth: 2,
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
 </script>
-@endpush
+@endsection

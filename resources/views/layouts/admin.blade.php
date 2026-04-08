@@ -1,52 +1,90 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', config('app.name'))</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset('assets/images/logos/favicon.png') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
-    @stack('styles')
+    <meta charset="UTF-8">
+    <title>@yield('title')</title>
+
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
-<body>
-    <!--  Body Wrapper -->
-    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
-        data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
+<body class="hold-transition sidebar-mini layout-fixed">
 
-        {{-- ===== SIDEBAR ===== --}}
-        @include('layouts.partials.sidebar')
+<div class="wrapper">
 
-        <!--  Main wrapper -->
-        <div class="body-wrapper">
+    <!-- ================= NAVBAR ================= -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
 
-            {{-- ===== HEADER / TOPBAR ===== --}}
-            @include('layouts.partials.topbar')
+        <!-- Left navbar -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+        </ul>
+        <!-- Right navbar -->
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link"
+                href="#"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
 
-            {{-- ===== KONTEN HALAMAN ===== --}}
-            <div class="body-wrapper-inner">
-                <div class="container-fluid">
-                    @yield('content')
-                </div>
-            </div>
+                <form id="logout-form"
+                    action="{{ route('logout') }}"
+                    method="POST"
+                    style="display: none;">
+                    @csrf
+                </form>
+            </li>
+        </ul>
 
-            {{-- ===== FOOTER ===== --}}
-            @include('layouts.partials.footer')
+    </nav>
 
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+        <a href="#" class="brand-link">
+            <span class="brand-text font-weight-light">Event Admin</span>
+        </a>
+
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview">
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
         </div>
+
+    </aside>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="content-wrapper">
+
+        <section class="content pt-3">
+            @yield('content')
+        </section>
+
     </div>
 
-    {{-- ===== SCRIPTS ===== --}}
-    <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/sidebarmenu.js') }}"></script>
-    <script src="{{ asset('assets/js/app.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets/libs/simplebar/dist/simplebar.js') }}"></script>
-    <script src="{{ asset('assets/js/dashboard.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-    @stack('scripts')
-</body>
+</div>
 
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+@yield('scripts')
+
+</body>
 </html>
