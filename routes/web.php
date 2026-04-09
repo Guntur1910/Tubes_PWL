@@ -10,6 +10,7 @@ use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\Organizer\OrganizerDashboardController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -79,4 +80,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
+});
+
+Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')->group(function () {
+
+        Route::get('/dashboard', [OrganizerDashboardController::class, 'index'])
+            ->name('organizer.dashboard');
+
+        Route::resource('events', EventController::class);
 });

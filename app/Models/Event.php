@@ -14,6 +14,7 @@ class Event extends Model
         'date',
         'location',
         'quota',
-        'price'
+        'price',
+        'organizer_id'
     ];
 }

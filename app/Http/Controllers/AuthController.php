@@ -38,14 +38,27 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ], $request->remember)) {
+
             $request->session()->regenerate();
 
-            if (Auth::user()->role === 'admin') {
-                return redirect('/admin/dashboard')->with('success', 'Login berhasil!');
+            $role = Auth::user()->role;
+
+            if ($role === 'admin') {
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Login berhasil!');
             }
 
-            return redirect()->route('user.home')->with('success', 'Login berhasil!');
+            if ($role === 'organizer') {
+                return redirect()->route('organizer.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            return redirect()->route('user.home')
+                ->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors([
