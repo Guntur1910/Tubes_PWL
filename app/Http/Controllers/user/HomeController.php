@@ -3,36 +3,41 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        // Ambil semua event terbaru
+        $events = Event::latest()->take(8)->get();
+        $popularProducts = Event::latest()->take(6)->get();
+        $popularProducts = Event::orderBy('created_at', 'desc')->paginate(6);
+        return view('user.home', compact('popularProducts'));
         return view('user.home', [
-            'heroTitle'       => 'New Collection',
-            'heroSubtitle'    => 'New Season',
-            'popularProducts' => [], // Isi dengan: Product::popular()->take(8)->get()
+            'heroTitle'       => 'Live Concert 2026',
+            'heroSubtitle'    => 'Don\'t Miss It',
+            'popularProducts' => $events, // kita tetap pakai nama ini biar blade gak perlu banyak diubah
+            'heroEventId'     => $events->first()->id ?? 1,
         ]);
     }
 
     public function shop()
     {
+        $events = Event::paginate(12);
+
         return view('user.shop', [
-            'products' => [], // Isi dengan: Product::paginate(12)
+            'products' => $events,
         ]);
     }
 
-    public function product($id)
-    {
-        return view('user.product', [
-            'product' => [], // Isi dengan: Product::findOrFail($id)
-        ]);
-    }
+    // 🔥 HAPUS function product() kalau sudah pakai EventController
+    // karena detail event sekarang lewat /event/{id}
 
     public function blog()
     {
         return view('user.blog', [
-            'posts' => [], // Isi dengan: Post::paginate(6)
+            'posts' => [],
         ]);
     }
 

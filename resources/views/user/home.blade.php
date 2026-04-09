@@ -4,190 +4,229 @@
 
 @section('content')
 
-{{-- ===== Hero / Welcome Area ===== --}}
-<section class="welcome_area" style="height: 350px; min-height: 350px;">
-    
-    {{-- Atribut data-ride="carousel" memastikan otomatis jalan sejak halaman dimuat --}}
-    <div id="heroCarousel" class="carousel slide h-100" data-ride="carousel" data-interval="4000">
-        
-        <div class="carousel-inner h-100">
-            
-            {{-- SLIDE 1 --}}
-            <div class="carousel-item active h-100 bg-img background-overlay" 
-                 style="background-image: url({{ asset('essence/img/bg-img/konser1.jpg') }});">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-12">
-                            <div class="hero-content">
-                                <h6>{{ $heroSubtitle ?? 'New Season' }}</h6>
-                                <h2>{{ $heroTitle ?? 'New Collection' }}</h2>
-                                <a href="{{ route('user.shop') }}" class="btn essence-btn">Lihat Tiket</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+@php
+    $heroEvent = $popularProducts->first();
+@endphp
 
-            {{-- SLIDE 2 --}}
-            <div class="carousel-item h-100 bg-img background-overlay" 
-                 style="background-image: url({{ asset('essence/img/bg-img/konser2.jpg') }});">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-12">
-                            <div class="hero-content">
-                                <h6>{{ $heroSubtitle ?? 'New Season' }}</h6>
-                                <h2>{{ $heroTitle ?? 'New Collection' }}</h2>
-                                <a href="{{ route('user.shop') }}" class="btn essence-btn">Lihat Tiket</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{-- SLIDE 3 --}}
-            <div class="carousel-item h-100 bg-img background-overlay" 
-                 style="background-image: url({{ asset('essence/img/bg-img/konser3.jpg') }});">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-12">
-                            <div class="hero-content">
-                                <h6>{{ $heroSubtitle ?? 'New Season' }}</h6>
-                                <h2>{{ $heroTitle ?? 'New Collection' }}</h2>
-                                <a href="{{ route('user.shop') }}" class="btn essence-btn">Lihat Tiket</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ================= HERO SECTION ================= -->
+<section class="welcome_area position-relative" style="height: 500px;">
+    <div class="carousel-item active h-100 bg-img background-overlay"
+         style="background-image: url('{{ asset('essence/img/bg-img/konser1.jpg') }}');">
 
-        </div>
+        <div class="container h-100 position-relative z-2">
+            <div class="row h-100 align-items-center">
+                <div class="col-12 text-center text-white">
 
-        {{-- ===== PANAH NAVIGASI ===== --}}
-        {{-- Panah Kiri --}}
-        <a class="carousel-control-prev" href="#heroCarousel" role="button" data-slide="prev" style="z-index: 99;">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        
-        {{-- Panah Kanan --}}
-        <a class="carousel-control-next" href="#heroCarousel" role="button" data-slide="next" style="z-index: 99;">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
+                    @if($heroEvent)
+                        <h6 class="text-uppercase mb-3">
+                            {{ \Carbon\Carbon::parse($heroEvent->date)->format('d M Y') }}
+                        </h6>
 
-    </div>
-</section>
+                        <h1 class="display-4 fw-bold mb-3">
+                            {{ $heroEvent->name }}
+                        </h1>
 
-{{-- ===== Produk Populer ===== --}}
-<section class="new_arrivals_area section-padding-80 clearfix">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="section-heading text-center">
-                    <h2>Paling Populer</h2>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <p class="mb-2">📍 {{ $heroEvent->location }}</p>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="popular-products-slides owl-carousel">
+                        <div id="countdown" class="fw-bold fs-5 mb-3"></div>
 
-                    @forelse($popularProducts ?? [] as $product)
-                    <div class="single-product-wrapper">
-                        <div class="product-img">
-                            <img src="{{ asset('essence/img/product-img/' . $product->image) }}" alt="{{ $product->name }}">
-                            <img class="hover-img" src="{{ asset('essence/img/product-img/' . ($product->image_hover ?? $product->image)) }}" alt="">
-
-                            @if($product->badge)
-                            <div class="product-badge {{ $product->badge_type ?? 'offer-badge' }}">
-                                <span>{{ $product->badge }}</span>
-                            </div>
-                            @endif
-
-                            <div class="product-favourite">
-                                <a href="#" class="favme fa fa-heart"></a>
-                            </div>
-                        </div>
-                        <div class="product-description">
-                            <span>{{ $product->brand }}</span>
-                            <a href="{{ route('user.product', $product->id) }}">
-                                <h6>{{ $product->name }}</h6>
-                            </a>
-                            <p class="product-price">
-                                @if($product->old_price)
-                                    <span class="old-price">${{ $product->old_price }}</span>
-                                @endif
-                                ${{ $product->price }}
-                            </p>
-                            <div class="hover-content">
-                                <div class="add-to-cart-btn">
-                                    <a href="{{ route('user.cart.add', $product->id) }}" class="btn essence-btn">
-                                        Tambah ke Keranjang
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    {{-- Data dummy jika belum ada produk di database --}}
-                    @for($i = 1; $i <= 4; $i++)
-                    <div class="single-product-wrapper">
-                        <div class="product-img">
-                            <img src="{{ asset('essence/img/product-img/product-' . $i . '.jpg') }}" alt="Produk">
-                            <img class="hover-img" src="{{ asset('essence/img/product-img/product-' . ($i % 4 + 1) . '.jpg') }}" alt="">
-                            <div class="product-favourite">
-                                <a href="#" class="favme fa fa-heart"></a>
-                            </div>
-                        </div>
-                        <div class="product-description">
-                            <span>Brand</span>
-                            <a href="#"><h6>Nama Produk {{ $i }}</h6></a>
-                            <p class="product-price">$80.00</p>
-                            <div class="hover-content">
-                                <div class="add-to-cart-btn">
-                                    <a href="#" class="btn essence-btn">Tambah ke Keranjang</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endfor
-                    @endforelse
+                        <a href="{{ route('user.event', $heroEvent->id) }}"
+                           class="btn essence-btn btn-lg rounded-pill px-5">
+                            🎫 Beli Tiket Sekarang
+                        </a>
+                    @else
+                        <h2>Event Terbaru Akan Segera Hadir</h2>
+                    @endif
 
                 </div>
             </div>
         </div>
     </div>
 </section>
-{{-- ===== CTA Banner ===== --}}
-<div class="cta-area">
+
+
+<!-- ================= SEARCH ================= -->
+<section class="py-4 bg-light">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="cta-content bg-img background-overlay"
-                    style="background-image: url({{ asset('essence/img/bg-img/projectpop.jpg') }});">
-                    <div class="h-100 d-flex align-items-center justify-content-end">
-                        <div class="cta--text">
-                            <h6>-60%</h6>
-                            <h2>Global Sale</h2>
-                            <a href="{{ route('user.shop') }}" class="btn essence-btn">Beli Sekarang</a>
+        <div class="col-md-6 mx-auto">
+            <input type="text" id="searchEvent"
+                   class="form-control rounded-pill shadow-sm"
+                   placeholder="Cari event...">
+        </div>
+    </div>
+</section>
+
+
+<!-- ================= EVENT LIST ================= -->
+<section class="section-padding-100">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold">🔥 Event Populer</h2>
+                <p class="text-muted">Temukan pengalaman konser terbaikmu 🎶</p>
+            </div>
+        </div>
+
+        <div class="row" id="eventList">
+
+            @forelse($popularProducts as $event)
+            <div class="col-md-4 mb-4 event-card" data-aos="fade-up">
+                <div class="card border-0 rounded-4 h-100 shadow-sm">
+
+                    <img src="{{ $event->image ?? asset('essence/img/bg-img/konser2.jpg') }}"
+                         class="card-img-top rounded-top-4"
+                         style="height:220px; object-fit:cover;">
+
+                    <div class="card-body text-center">
+
+                        @if($event->quota <= 0)
+                            <span class="badge bg-danger mb-2">SOLD OUT</span>
+                        @elseif($event->quota <= 20)
+                            <span class="badge bg-warning text-dark mb-2">🔥 Hampir Habis</span>
+                        @endif
+
+                        <h5 class="fw-bold">{{ $event->name }}</h5>
+
+                        <p class="text-muted small mb-1">
+                            📅 {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}
+                        </p>
+
+                        <p class="text-muted small">
+                            📍 {{ $event->location }}
+                        </p>
+
+                        <h5 class="fw-bold text-primary mb-3">
+                            Rp {{ number_format($event->price, 0, ',', '.') }}
+                        </h5>
+
+                        <!-- Progress Kuota -->
+                        @php
+                            $percentage = min(100, ($event->quota / 100) * 100);
+                        @endphp
+
+                        <div class="progress mb-3" style="height:6px;">
+                            <div class="progress-bar bg-success"
+                                 style="width: {{ $percentage }}%">
+                            </div>
                         </div>
+
+                        <a href="{{ route('user.event', $event->id) }}"
+                           class="btn btn-dark w-100 rounded-pill">
+                            Lihat Detail
+                        </a>
+
                     </div>
                 </div>
             </div>
+            @empty
+                <div class="col-12 text-center">
+                    <p class="text-muted">Belum ada event tersedia.</p>
+                </div>
+            @endforelse
+
         </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $popularProducts->links() }}
+        </div>
+
     </div>
-</div>
+</section>
 
 
-{{-- ===== Brand Logos ===== --}}
-<div class="brands-area d-flex align-items-center justify-content-between">
+<!-- ================= COMING SOON ================= -->
+<section class="py-5 bg-dark text-white text-center">
+    <div class="container">
+        <h3 class="fw-bold">🎶 Coming Soon</h3>
+        <p class="text-muted">Event spektakuler lainnya segera hadir!</p>
+    </div>
+</section>
+
+
+<!-- ================= BRAND LOGO ================= -->
+<div class="brands-area d-flex align-items-center justify-content-between p-4">
     @for($i = 1; $i <= 6; $i++)
-    <div class="single-brands-logo">
-        <img src="{{ asset('essence/img/core-img/brand' . $i . '.png') }}" alt="Brand {{ $i }}">
-    </div>
+        <div class="single-brands-logo">
+            <img src="{{ asset('essence/img/core-img/brand' . $i . '.png') }}">
+        </div>
     @endfor
 </div>
+
+
+<!-- ================= DARK MODE TOGGLE ================= -->
+<div class="text-center py-3">
+    <button id="darkModeToggle" class="btn btn-outline-dark rounded-pill">
+        🌙 Toggle Dark Mode
+    </button>
+</div>
+
+
+<!-- ================= SCRIPT ================= -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+AOS.init();
+
+// SEARCH FILTER
+document.getElementById("searchEvent").addEventListener("keyup", function() {
+    let value = this.value.toLowerCase();
+    document.querySelectorAll(".event-card").forEach(function(card) {
+        card.style.display = card.innerText.toLowerCase().includes(value) ? "" : "none";
+    });
+});
+
+// COUNTDOWN
+@if($heroEvent)
+const eventDate = new Date("{{ $heroEvent->date }}").getTime();
+const countdown = document.getElementById("countdown");
+
+setInterval(function(){
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+
+    if(distance > 0){
+        const days = Math.floor(distance / (1000*60*60*24));
+        const hours = Math.floor((distance % (1000*60*60*24))/(1000*60*60));
+        countdown.innerHTML = "⏳ " + days + " Hari " + hours + " Jam Lagi";
+    } else {
+        countdown.innerHTML = "Event Sedang Berlangsung!";
+    }
+}, 1000);
+@endif
+
+// DARK MODE
+document.getElementById("darkModeToggle").addEventListener("click", function(){
+    document.body.classList.toggle("dark-mode");
+});
+</script>
+
+
+<!-- ================= STYLE ================= -->
+<style>
+.background-overlay::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.8));
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.dark-mode {
+    background-color:#121212;
+    color:white;
+}
+.dark-mode .card {
+    background-color:#1f1f1f;
+    color:white;
+}
+</style>
 
 @endsection

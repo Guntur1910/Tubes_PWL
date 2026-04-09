@@ -31,7 +31,7 @@
 
                 {{-- ===== TAMBAHKAN MENU LAIN DI SINI ===== --}}
                 {{-- Contoh menu dengan submenu: --}}
-                {{--
+                
                 <li class="nav-small-cap">
                     <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
                     <span class="hide-menu">Master Data</span>
@@ -57,7 +57,7 @@
                         </li>
                     </ul>
                 </li>
-                --}}
+                
 
                 {{-- ===== AUTH ===== --}}
                 <li><span class="sidebar-divider lg"></span></li>
