@@ -3,6 +3,7 @@
 @push('styles')
 <link rel="stylesheet" href="[unpkg.com](https://unpkg.com/aos@2.3.1/dist/aos.css)" />
 <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css)" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* ===== VARIABLES ===== */
 :root {
@@ -240,6 +241,54 @@ body {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50%       { transform: translateX(-50%) translateY(8px); }
 }
+.hero-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    /* Efek transisi halus saat gambar berubah */
+    transition: background-image 0.8s ease-in-out;
+    z-index: -2;
+}
+
+/* Styling Tombol Navigasi */
+.hero-nav {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    transform: translateY(-50%);
+    z-index: 10;
+    pointer-events: none; /* Agar tidak menghalangi klik di tengah */
+}
+
+.nav-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--primary, #7c3aed);
+    transform: scale(1.1);
+}
 /* ===== SEARCH SECTION ===== */
 .search-section {
     background: #fff;
@@ -339,6 +388,7 @@ body {
     color: #fff;
     box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
+
 /* ===== EVENT CARD ===== */
 .event-card {
     height: 100%;
@@ -550,10 +600,10 @@ body {
 .cs-title {
     font-size: 2.2rem;
     font-weight: 900;
-    color: #fff;
+    color: black;
     margin-bottom: 12px;
 }
-.cs-subtitle { color: rgba(255,255,255,0.5); font-size: 1rem; margin-bottom: 36px; }
+.cs-subtitle { color: black; font-size: 1rem; margin-bottom: 36px; }
 .cs-notify-form {
     display: flex;
     gap: 10px;
@@ -567,15 +617,15 @@ body {
     min-width: 220px;
     padding: 14px 22px;
     border-radius: 50px;
-    border: 2px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.438);
+    background: rgba(13, 12, 12, 0);
+    color: rgb(0, 0, 0);
     font-size: 0.9rem;
     outline: none;
     transition: var(--transition);
     backdrop-filter: blur(8px);
 }
-.cs-input::placeholder { color: rgba(255,255,255,0.35); }
+.cs-input::placeholder { color: rgba(1, 1, 1, 0.434); }
 .cs-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
 .btn-cs {
     padding: 14px 28px;
@@ -705,6 +755,21 @@ body.dark-mode .section-tag {
     .cs-title { font-size: 1.7rem; }
 }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    tabs.forEach(button => {
+        button.addEventListener('click', function() {
+            const currentActive = document.querySelector('.filter-tab.active');
+            if (currentActive) {
+                currentActive.classList.remove('active');
+            }
+            this.classList.add('active');
+        });
+    });
+});
+</script>
 @endpush
 @section('content')
 @php $heroEvent = $popularProducts->first(); @endphp
@@ -759,14 +824,13 @@ body.dark-mode .section-tag {
     </div>
     <div class="hero-scroll">
         <span>Scroll</span>
-        <i class="fas fa-chevron-down"></i>
     </div>
 </section>
 <!-- ================= SEARCH ================= -->
 <section class="search-section" id="events">
     <div class="container">
         <div class="search-wrapper">
-            <i class="fas fa-search"></i>
+            <i class="fa fa-search" aria-hidden="true"></i>
             <input type="text" id="searchEvent" class="search-input"
                    placeholder="Cari nama event, lokasi...">
         </div>
