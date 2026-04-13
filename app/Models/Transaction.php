@@ -9,7 +9,7 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['status', 'total_amount'];
+    protected $fillable = ['user_id', 'event_id', 'ticket_type_id', 'quantity', 'total_amount', 'status'];
 
     public function user()
     {
@@ -19,5 +19,15 @@ class Transaction extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function ticketType()
+    {
+        return $this->belongsTo(TicketType::class, 'ticket_type_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

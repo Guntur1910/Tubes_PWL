@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -24,11 +27,9 @@ class HomeController extends Controller
 
     public function shop()
     {
-        $events = Event::paginate(12);
-
-        return view('user.shop', [
-            'products' => $events,
-        ]);
+        // Ambil semua event (bisa ditambah pagination nantinya)
+        $events = Event::all() ?? []; 
+        return view('user.shop', compact('events'));
     }
 
     // 🔥 HAPUS function product() kalau sudah pakai EventController
@@ -48,8 +49,46 @@ class HomeController extends Controller
 
     public function checkout()
     {
-        return view('user.checkout', [
-            'cart' => session('cart', []),
-        ]);
+        // Mengambil semua transaksi user yang statusnya masih 'pending' (bertindak sebagai keranjang)
+        $cart = Transaction::with('event', 'ticketType')
+                ->where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->get();
+
+        // Hitung total harga semua tiket di keranjang
+        $total = $cart->sum('total_amount');
+
+        return view('user.checkout', compact('cart', 'total'));
+    }
+
+    // Simulasi Pembayaran (Update status transaksi)
+    public function payCheckout(Request $request)
+    {
+        // Ambil semua transaksi pending user
+        $pendingTransactions = Transaction::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->with(['event', 'ticketType'])
+            ->get();
+
+        if ($pendingTransactions->isEmpty()) {
+            return redirect()->route('user.checkout')->with('error', 'Tidak ada item di keranjang');
+        }
+
+        // Update status menjadi paid
+        Transaction::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->update(['status' => 'paid']);
+
+        // Auto-generate tickets untuk setiap transaksi
+        $ticketController = new \App\Http\Controllers\TicketController();
+        foreach ($pendingTransactions as $transaction) {
+            try {
+                $ticketController->generateTickets($transaction);
+            } catch (\Exception $e) {
+                \Log::error('Failed to generate tickets for transaction ' . $transaction->id . ': ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('user.tickets')->with('success', 'Pembayaran berhasil! E-tickets telah dikirim ke email Anda.');
     }
 }

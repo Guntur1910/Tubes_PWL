@@ -3,23 +3,54 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
 
 class Ticket extends Model
 {
-    protected $table = 'tickets';
-    protected $primaryKey = 'id_tickets';
-
     protected $fillable = [
-        'order_item_id', 'user_id', 'event_id', 'ticket_type_id', 'ticket_code', 'qr_code_url', 'holder_name', 'is_used', 'used_at'
+        'transaction_id', 'ticket_code', 'qr_code_path', 'status', 'used_at'
+    ];
+
+    protected $casts = [
+        'used_at' => 'datetime',
     ];
 
     // Relasi
-    public function user() {
-        return $this->belongsTo(User::class, 'user_id', 'id_users');
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class);
     }
 
-    public function event() {
-        return $this->belongsTo(Event::class, 'event_id', 'id_events');
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    public function ticketType()
+    {
+        return $this->belongsTo(TicketType::class, 'ticket_type_id');
+    }
+
+    // Helper methods
+    public function isUsed()
+    {
+        return $this->status === 'used';
+    }
+
+    public function markAsUsed()
+    {
+        $this->update([
+            'status' => 'used',
+            'used_at' => now()
+        ]);
+    }
+
+    public function generateTicketCode()
+    {
+        return 'TKT-' . strtoupper(substr(md5(uniqid()), 0, 8));
     }
 }
