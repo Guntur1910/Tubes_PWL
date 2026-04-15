@@ -11,7 +11,7 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h6>Total Event</h6>
-                    <h3>{{ $totalEvent }}</h3>
+                    <h3>{{ $totalEvents }}</h3>
                 </div>
             </div>
         </div>
@@ -34,6 +34,39 @@
             </div>
         </div>
 
+    </div> 
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>My Events</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($events as $event)
+                        <tr>
+                            <td>{{ $event->name }}</td>
+                            <td>{{ $event->date }}</td>
+                            <td>{{ $event->location }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                No events yet.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </div>
 @endsection

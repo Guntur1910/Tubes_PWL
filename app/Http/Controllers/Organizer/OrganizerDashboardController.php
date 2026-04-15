@@ -11,26 +11,34 @@ class OrganizerDashboardController extends Controller
 {
     public function index()
     {
-        $organizerId = Auth::id();
+        $organizerId = auth::id();
 
-        $eventIds = Event::where('organizer_id', $organizerId)
-                    ->pluck('id')
-                    ->toArray();
+        // Event milik organizer
+        $events = \App\Models\Event::where('organizer_id', $organizerId)->get();
 
-        $totalEvent = count($eventIds);
+        $eventIds = $events->pluck('id');
 
-        $totalRevenue = Transaction::whereIn('event_id', $eventIds)
+        $totalEvents = $events->count();
+
+        $totalRevenue = \App\Models\Transaction::whereIn('event_id', $eventIds)
             ->where('status', 'paid')
             ->sum('total_amount');
 
-        $totalTicket = Transaction::whereIn('event_id', $eventIds)
+        $totalTicket = \App\Models\Transaction::whereIn('event_id', $eventIds)
             ->where('status', 'paid')
             ->sum('quantity');
 
+        $latestTransactions = \App\Models\Transaction::whereIn('event_id', $eventIds)
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('organizer.dashboard', compact(
-            'totalEvent',
+            'events',
+            'totalEvents',
             'totalRevenue',
-            'totalTicket'
+            'totalTicket',
+            'latestTransactions'
         ));
     }
 }

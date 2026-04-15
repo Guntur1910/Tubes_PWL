@@ -11,6 +11,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Organizer\OrganizerDashboardController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\PaymentController;
+
 
 Route::get('/', function () {
     return Auth::check()
@@ -50,6 +55,12 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::resource('events', AdminEventController::class);
+
+    // 🎫 SCAN TICKET ROUTES
+    Route::get('/scan-ticket', [App\Http\Controllers\TicketController::class, 'scanPage'])->name('scan-ticket');
+    Route::post('/validate-ticket', [App\Http\Controllers\TicketController::class, 'validateTicket'])->name('validate-ticket');
 
 });
 
@@ -82,10 +93,63 @@ Route::middleware('auth')->group(function () {
 
 });
 
+
+
 Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')->group(function () {
 
         Route::get('/dashboard', [OrganizerDashboardController::class, 'index'])
-            ->name('organizer.dashboard');
+            ->name('dashboard');
 
         Route::resource('events', EventController::class);
 });
+
+// ... route lainnya ...
+
+Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/shop', [HomeController::class, 'shop'])->name('shop');
+    Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
+    
+    // ✅ Route untuk memproses "Add to Cart" dari halaman detail
+    Route::post('/event/buy', [EventController::class, 'buyTicket'])->name('checkout.process');
+
+    // ✅ Route untuk memproses pembayaran final (Place Order) di halaman checkout
+    Route::post('/checkout/pay', [HomeController::class, 'payCheckout'])->name('checkout.pay');
+
+    // ✅ Route untuk update quantity tiket di keranjang
+    Route::post('/cart/{transaction}/update-quantity', [EventController::class, 'updateQuantity'])->name('cart.update-quantity');
+
+    // ✅ Route untuk hapus tiket dari keranjang
+    Route::delete('/cart/{transaction}/delete', [EventController::class, 'deleteFromCart'])->name('cart.delete');
+
+    // 🎫 TICKET MANAGEMENT ROUTES
+    Route::get('/tickets', [App\Http\Controllers\TicketController::class, 'myTickets'])->name('tickets');
+    Route::post('/tickets/generate/{transaction}', [App\Http\Controllers\TicketController::class, 'generateTickets'])->name('tickets.generate');
+    Route::post('/tickets/join-waiting-list', [App\Http\Controllers\TicketController::class, 'joinWaitingList'])->name('tickets.join-waiting-list');
+
+    Route::get('/event/{id}', [EventController::class, 'show'])->name('event');
+});
+
+
+Route::get('/transaction/paid/{id}', [TransactionController::class, 'markAsPaid']);
+
+
+// ========================== QR TICKET  VALIDATION ==========================
+Route::post('/tickets/generate/{transaction}', [TicketController::class, 'generate'])
+    ->name('user.tickets.generate');
+
+Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
+
+Route::get('/admin/scan', [TicketController::class, 'scanPage']);
+Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
+
+Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
+Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('user.checkout');
+Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('user.checkout.pay');
+
+Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
+Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
+
+

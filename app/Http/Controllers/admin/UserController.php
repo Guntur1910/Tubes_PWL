@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -24,12 +25,22 @@ class UserController extends Controller
         return view('user.shop');
     }
 
-
     public function show($id)
     {
     $event = Event::findOrFail($id);
 
     return view('user.product-detail', compact('event'));
-}
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,organizer,user',
+        ]);
+ 
+        $user->update(['role' => $request->role]);
+ 
+        return back()->with('success', "Role {$user->name} berhasil diubah menjadi {$request->role}.");
+    }
 
 }
