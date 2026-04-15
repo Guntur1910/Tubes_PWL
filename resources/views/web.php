@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TicketController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,3 +34,4 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // Route Auth (bawaan Laravel Breeze/UI)
 // Jika belum install auth, jalankan: php artisan breeze:install
 require __DIR__.'/auth.php';
+

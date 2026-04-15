@@ -11,6 +11,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Organizer\OrganizerDashboardController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\PaymentController;
+
 
 Route::get('/', function () {
     return Auth::check()
@@ -121,3 +125,27 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
 
     Route::get('/event/{id}', [EventController::class, 'show'])->name('event');
 });
+
+
+Route::get('/transaction/paid/{id}', [TransactionController::class, 'markAsPaid']);
+
+
+// ========================== QR TICKET  VALIDATION ==========================
+Route::post('/tickets/generate/{transaction}', [TicketController::class, 'generate'])
+    ->name('user.tickets.generate');
+
+Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
+
+Route::get('/admin/scan', [TicketController::class, 'scanPage']);
+Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
+
+Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
+Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('user.checkout');
+Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('user.checkout.pay');
+
+Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
+Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
+
+
