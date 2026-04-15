@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Organizer\OrganizerDashboardController;
+use App\Http\Controllers\User\CheckoutController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -88,4 +89,15 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')
             ->name('organizer.dashboard');
 
         Route::resource('events', EventController::class);
+Route::post('/user/checkout', [CheckoutController::class, 'process'])
+    ->name('user.checkout.process');
 });
+
+
+Route::post('/checkout/process', [CheckoutController::class, 'process'])
+    ->name('user.checkout.process')
+    ->middleware('auth');
+
+Route::post('/tickets/join-waiting-list', [TicketController::class, 'joinWaitingList'])
+    ->name('user.tickets.join-waiting-list')
+    ->middleware('auth');

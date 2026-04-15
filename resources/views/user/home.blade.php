@@ -1,8 +1,7 @@
 @extends('layouts.user')
 @section('title', 'Home - ' . config('app.name'))
 @push('styles')
-<link rel="stylesheet" href="[unpkg.com](https://unpkg.com/aos@2.3.1/dist/aos.css)" />
-<link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css)" />
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* ===== VARIABLES ===== */
@@ -56,8 +55,9 @@ body {
     background-size: cover;
     background-position: center;
     transform: scale(1.06);
-    transition: transform 8s ease;
+    transition: transform 8s ease, background-image 0.8s ease-in-out;
     will-change: transform;
+    z-index: -2;
 }
 .hero-section:hover .hero-bg { transform: scale(1.0); }
 .hero-overlay {
@@ -241,54 +241,56 @@ body {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50%       { transform: translateX(-50%) translateY(8px); }
 }
-.hero-section {
-    position: relative;
-    overflow: hidden;
-}
 
-.hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    /* Efek transisi halus saat gambar berubah */
-    transition: background-image 0.8s ease-in-out;
-    z-index: -2;
-}
-
-/* Styling Tombol Navigasi */
+/* ===== NEW & IMPROVED HERO NAV ===== */
 .hero-nav {
     position: absolute;
     top: 50%;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 40px;
     transform: translateY(-50%);
-    z-index: 10;
-    pointer-events: none; /* Agar tidak menghalangi klik di tengah */
+    z-index: 20;
+    pointer-events: none; 
 }
 
 .nav-btn {
-    width: 50px;
-    height: 50px;
+    width: 45px !important;  
+    height: 45px !important; 
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     color: white;
     cursor: pointer;
     pointer-events: auto;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    padding: 0 !important;
+}
+
+.nav-btn i {
+    font-size: 16px !important; 
+    line-height: 1 !important;
+    transition: transform 0.3s ease;
+    margin: 0 !important;
 }
 
 .nav-btn:hover {
-    background: var(--primary, #7c3aed);
+    background: var(--primary);
+    border-color: var(--primary-light);
     transform: scale(1.1);
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
 }
+
+#prevHero:hover i { transform: translateX(-3px); }
+#nextHero:hover i { transform: translateX(3px); }
+
 /* ===== SEARCH SECTION ===== */
 .search-section {
     background: #fff;
@@ -330,6 +332,7 @@ body {
     box-shadow: 0 4px 24px rgba(124,58,237,0.22);
 }
 .search-input::placeholder { color: #a0aec0; }
+
 /* ===== SECTION HEADER ===== */
 .section-header { text-align: center; margin-bottom: 50px; }
 .section-tag {
@@ -357,11 +360,13 @@ body {
     max-width: 480px;
     margin: 0 auto;
 }
+
 /* ===== EVENTS SECTION ===== */
 .events-section {
     padding: 80px 0 100px;
     background: #faf7ff;
 }
+
 /* ===== FILTER TABS ===== */
 .filter-tabs {
     display: flex;
@@ -388,6 +393,62 @@ body {
     color: #fff;
     box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
+
+/* ===== EVENT CAROUSEL (NEW CSS) ===== */
+.event-carousel-wrapper {
+    position: relative;
+    width: 100%;
+    padding: 0 10px;
+}
+.event-carousel-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 20px 10px 40px 10px; /* Space for hover shadows */
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;  
+    scrollbar-width: none;  
+}
+.event-carousel-track::-webkit-scrollbar { 
+    display: none; 
+}
+.event-card-col {
+    flex: 0 0 calc(33.333% - 16px);
+    min-width: 300px; /* Minimal width agar tidak gepeng */
+    scroll-snap-align: start;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* CAROUSEL NAV BUTTONS */
+.carousel-action-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--primary);
+    border: 2px solid #ede9fe;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+.carousel-action-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(124,58,237,0.3);
+}
+.carousel-action-btn i { font-size: 1rem; }
+.btn-prev-event { left: -25px; }
+.btn-next-event { right: -25px; }
 
 /* ===== EVENT CARD ===== */
 .event-card {
@@ -502,6 +563,7 @@ body {
     color: var(--primary);
     flex-shrink: 0;
 }
+
 /* ===== QUOTA PROGRESS ===== */
 .quota-wrapper { margin-bottom: 18px; }
 .quota-label {
@@ -542,6 +604,7 @@ body {
     50%  { opacity: 1; }
     100% { transform: skewX(-15deg) translateX(200px); opacity: 0; }
 }
+
 /* ===== CARD BUTTON ===== */
 .btn-card {
     display: flex;
@@ -567,17 +630,23 @@ body {
     content: '';
     position: absolute;
     top: -50%;
-    left: -75%;
-    width: 50(124,58,237,0.25);
-    top: -150px;
-    left: -100px;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
 }
+
 .cs-glow-2 {
     width: 350px;
     height: 350px;
     background: rgba(245,158,11,0.12);
+    position: absolute;
     bottom: -100px;
     right: -80px;
+    border-radius: 50%;
+    z-index: 1;
 }
 .cs-content { position: relative; z-index: 2; text-align: center; }
 .cs-icon {
@@ -589,6 +658,7 @@ body {
     align-items: center;
     justify-content: center;
     margin: 0 auto 24px;
+    color: #fff;
     font-size: 2rem;
     box-shadow: 0 0 40px rgba(124,58,237,0.5);
     animation: pulse-glow 3s infinite;
@@ -640,6 +710,7 @@ body {
     box-shadow: 0 4px 20px rgba(245,158,11,0.4);
 }
 .btn-cs:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.6); }
+
 /* ===== BRANDS ===== */
 .brands-section {
     background: #fff;
@@ -661,6 +732,7 @@ body {
     transition: var(--transition);
 }
 .brand-item:hover img { opacity: 0.85; filter: grayscale(0%); }
+
 /* ===== DARK MODE TOGGLE ===== */
 .dark-toggle-wrapper {
     position: fixed;
@@ -684,6 +756,7 @@ body {
     justify-content: center;
 }
 .btn-dark-toggle:hover { transform: scale(1.12) rotate(20deg); }
+
 /* ===== DARK MODE ===== */
 body.dark-mode {
     background: var(--bg-dark);
@@ -724,11 +797,13 @@ body.dark-mode .section-tag {
     background: linear-gradient(135deg, #2d1f4e, #3a2563);
     color: var(--primary-light);
 }
+
 /* ===== EMPTY STATE ===== */
 .empty-state {
     text-align: center;
     padding: 70px 20px;
     color: #9ca3af;
+    width: 100%;
 }
 .empty-state i {
     font-size: 3.5rem;
@@ -736,6 +811,7 @@ body.dark-mode .section-tag {
     color: #d8b4fe;
 }
 .empty-state h5 { color: #6b7280; font-weight: 700; }
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-18px); }
@@ -745,7 +821,14 @@ body.dark-mode .section-tag {
     from { opacity: 0; transform: translateY(22px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
 /* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .event-card-col { flex: 0 0 calc(50% - 12px); }
+    .btn-prev-event { left: -10px; }
+    .btn-next-event { right: -10px; }
+}
+
 @media (max-width: 768px) {
     .hero-section { max-height: 700px; }
     .hero-title { font-size: 2rem; }
@@ -753,286 +836,220 @@ body.dark-mode .section-tag {
     .countdown-box { padding: 10px 14px; min-width: 66px; }
     .btn-hero-primary, .btn-hero-outline { padding: 13px 26px; font-size: 0.9rem; }
     .cs-title { font-size: 1.7rem; }
+    
+    .hero-nav { padding: 0 15px; }
+    .nav-btn { width: 44px; height: 44px; }
+    .nav-btn i { font-size: 1rem; }
+
+    /* Hide buttons on mobile, allow native swiping */
+    .carousel-action-btn { display: none; } 
+    .event-card-col { flex: 0 0 100%; }
 }
 </style>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.filter-tab');
-    
-    tabs.forEach(button => {
-        button.addEventListener('click', function() {
-            const currentActive = document.querySelector('.filter-tab.active');
-            if (currentActive) {
-                currentActive.classList.remove('active');
-            }
-            this.classList.add('active');
-        });
-    });
-});
-</script>
 @endpush
+
+@php
+    $heroEvents = $popularProducts->take(3);
+    $heroEvent = $heroEvents->first(); 
+@endphp
+
 @section('content')
-@php $heroEvent = $popularProducts->first(); @endphp
-<!-- ================= HERO ================= -->
+
 <section class="hero-section">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
 
-    @if($heroEvents->count())
+    <div class="hero-nav">
+        <button class="nav-btn" id="prevHero">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn" id="nextHero">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
 
-        {{-- BACKGROUND IMAGE --}}
-        <div class="hero-bg"
-             style="background-image: url('{{ asset('storage/' . $heroEvents[0]->poster) }}')">
-        </div>
+    <div class="hero-particles" id="heroParticles"></div>
 
-        <div class="hero-overlay"></div>
-
-        <div class="hero-content text-center">
-
+    <div class="hero-content">
+        @if($heroEvents->count())
             <div class="hero-badge">
-                🔥 Event Terpopuler
+                <i class="fas fa-fire"></i>
+                Event Terpopuler
             </div>
 
-            <h1 class="hero-title">
-                {{ $heroEvents[0]->name }}
-            </h1>
+            <h1 class="hero-title">Loading...</h1>
 
             <p class="hero-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ $heroEvents[0]->location }}
+                <i class="fas fa-map-marker-alt" style="color: #f59e0b; margin-right:6px;"></i>
+                Loading...
             </p>
-            <div class="hero-countdown" id="countdownWrap">
-                <div class="countdown-box">
-                    <span class="num" id="cd-days">--</span>
-                    <span class="label">Hari</span>
-                </div>
-                <div class="countdown-box">
-                    <span class="num" id="cd-hours">--</span>
-                    <span class="label">Jam</span>
-                </div>
-                <div class="countdown-box">
-                    <span class="num" id="cd-minutes">--</span>
-                    <span class="label">Menit</span>
-                </div>
-                <div class="countdown-box">
-                    <span class="num" id="cd-seconds">--</span>
-                    <span class="label">Detik</span>
-                </div>
-            </div>
+
             <div class="hero-actions">
-                <a href="{{ route('user.event', $heroEvents[0]->id) }}"
-                   class="btn-hero-primary">
-                    🎫 Beli Tiket
+                <a href="#" id="heroBtn" class="btn-hero-primary">
+                    <span><i class="fas fa-ticket-alt"></i> Beli Tiket</span>
                 </a>
+
                 <a href="#events" class="btn-hero-outline">
-                    Jelajahi Event
+                    <i class="fas fa-compass"></i> Jelajahi Event
                 </a>
             </div>
-
-        </div>
-
-    @else
-
-        <div class="hero-content text-center">
+        @else
             <h1 class="hero-title">Event Segera Hadir</h1>
-        </div>
+        @endif
+    </div>
 
-    @endif
-
+    <div class="hero-scroll">
+        <span>Scroll</span>
+    </div>
 </section>
-
 
 <section class="search-section" id="events">
     <div class="container">
         <div class="search-wrapper">
-            <i class="fa fa-search"></i>
+            <i class="fa fa-search" aria-hidden="true"></i>
             <input type="text" id="searchEvent" class="search-input"
                    placeholder="Cari nama event, lokasi...">
         </div>
     </div>
 </section>
 
-
 <section class="events-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <div class="section-tag">🔥 Populer</div>
             <h2 class="section-title">Event yang Sedang Hits</h2>
-            <p class="section-subtitle">
-                Temukan pengalaman konser tak terlupakan dan pesan tiketmu sekarang
-            </p>
+            <p class="section-subtitle">Temukan pengalaman konser tak terlupakan dan pesan tiketmu sekarang</p>
         </div>
 
-        {{-- FILTER CATEGORY --}}
-        <div class="filter-tabs" data-aos="fade-up">
+        <div class="filter-tabs" data-aos="fade-up" data-aos-delay="100">
             <button class="filter-tab active" data-category="all">Semua</button>
             <button class="filter-tab" data-category="konser">Konser</button>
             <button class="filter-tab" data-category="festival">Festival</button>
             <button class="filter-tab" data-category="theater">Theater</button>
         </div>
 
-        <div class="event-carousel-wrapper" data-aos="fade-up">
-
+        <div class="event-carousel-wrapper" data-aos="fade-up" data-aos-delay="150">
             <button class="carousel-action-btn btn-prev-event" id="scrollEventPrev">
                 <i class="fas fa-chevron-left"></i>
             </button>
-
             <button class="carousel-action-btn btn-next-event" id="scrollEventNext">
                 <i class="fas fa-chevron-right"></i>
             </button>
 
             <div class="event-carousel-track" id="eventList">
-
                 @forelse($popularProducts as $event)
-
-                <div class="event-card-col"
-                     data-category="{{ strtolower($event->category ?? 'all') }}">
-
+                <div class="event-card-col" data-category="{{ strtolower($event->category ?? 'all') }}">
                     <div class="event-card">
                         <div class="event-card-inner">
-
-                            {{-- 🔥 IMAGE --}}
                             <div class="card-img-wrapper">
-
-                                <img
-                                    src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('essence/img/bg-img/konser2.jpg') }}"
-                                    class="card-img-cover"
-                                    alt="{{ $event->name }}"
-                                    loading="lazy">
-
+                                <img src="{{ $event->image ?? asset('essence/img/bg-img/konser2.jpg') }}"
+                                     class="card-img-cover"
+                                     alt="{{ $event->name }}"
+                                     loading="lazy">
                                 <div class="card-img-overlay-gradient"></div>
-
-                                {{-- DATE --}}
                                 <div class="card-date-chip">
                                     <i class="fas fa-calendar-alt"></i>
                                     {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}
                                 </div>
-
-                                {{-- BADGE --}}
                                 @if($event->quota <= 0)
                                     <div class="card-badge badge-sold">Sold Out</div>
                                 @elseif($event->quota <= 20)
                                     <div class="card-badge badge-hot">🔥 Hampir Habis</div>
                                 @endif
-
-                                {{-- PRICE --}}
                                 <div class="card-price-tag">
                                     Rp {{ number_format($event->price, 0, ',', '.') }}
                                 </div>
                             </div>
-
-                            {{-- BODY --}}
                             <div class="event-card-body">
-
-                                <h5 class="event-card-title">
-                                    {{ $event->name }}
-                                </h5>
-
+                                <h5 class="event-card-title">{{ $event->name }}</h5>
                                 <div class="event-card-meta">
-
                                     <div class="event-meta-item">
                                         <i class="fas fa-map-marker-alt"></i>
                                         <span>{{ $event->location }}</span>
                                     </div>
-
-                                    <div class="event-meta-item">
-                                        <i class="fas fa-tag"></i>
-                                        <span>{{ ucfirst($event->category) }}</span>
-                                    </div>
-
                                     <div class="event-meta-item">
                                         <i class="fas fa-ticket-alt"></i>
-                                        <span>
-                                            {{ $event->quota > 0 ? $event->quota . ' tiket tersisa' : 'Tiket habis' }}
-                                        </span>
+                                        <span>{{ $event->quota > 0 ? $event->quota . ' tiket tersisa' : 'Tiket habis' }}</span>
                                     </div>
-
                                 </div>
-
-                                {{-- PROGRESS BAR --}}
                                 @php
                                     $maxQuota = 100;
                                     $percentage = $event->quota > 0 ? min(100, ($event->quota / $maxQuota) * 100) : 0;
                                 @endphp
-
                                 <div class="quota-wrapper">
                                     <div class="quota-label">
-                                        <span>Ketersediaan</span>
+                                        <span>Ketersediaan Tiket</span>
                                         <span>{{ round($percentage) }}%</span>
                                     </div>
-
                                     <div class="quota-bar">
-                                        <div class="quota-fill"
-                                             style="width: {{ $percentage }}%;
-                                             @if($event->quota <= 0)
-                                                background: #ef4444;
-                                             @elseif($event->quota <= 20)
-                                                background: linear-gradient(90deg,#fbbf24,#f59e0b);
-                                             @endif">
+                                        <div class="quota-fill" style="width: {{ $percentage }}%;
+                                            @if($event->quota <= 0) background: #ef4444;
+                                            @elseif($event->quota <= 20) background: linear-gradient(90deg, #fbbf24, #f59e0b);
+                                            @endif">
                                         </div>
                                     </div>
                                 </div>
-
-                                {{-- BUTTON --}}
-                                <a href="{{ route('user.event', $event->id) }}"
-                                   class="btn-card">
+                                <a href="{{ route('user.event', $event->id) }}" class="btn-card">
                                     <i class="fas fa-arrow-right"></i>
-                                    Lihat Detail
+                                    Lihat Detail &amp; Pesan
                                 </a>
-
                             </div>
-
                         </div>
                     </div>
                 </div>
-
                 @empty
-
                 <div class="empty-state">
                     <i class="fas fa-calendar-times"></i>
                     <h5>Belum ada event tersedia</h5>
-                    <p>Event baru akan segera ditambahkan</p>
+                    <p>Event baru akan segera ditambahkan, stay tuned!</p>
                 </div>
-
                 @endforelse
-
             </div>
-            @endforelse
         </div>
-        <div class="pagination-wrapper" data-aos="fade-up">
-            {{ $popularProducts->links() }}
-        </div>
+        
     </div>
 </section>
 
-
-<section class="coming-soon-section pt-5 pb-5">
+<section class="coming-soon-section position-relative overflow-hidden pt-5 pb-5">
+    <div class="cs-glow-2"></div>
     <div class="container">
         <div class="cs-content" data-aos="fade-up">
-            <div class="cs-icon">🎶</div>
+            <div class="cs-icon"><i class="fas fa-music"></i></div>
             <h3 class="cs-title">Event Berikutnya Sudah Dekat</h3>
-            <p class="cs-subtitle">
-                Daftarkan email kamu untuk mendapat notifikasi
-            </p>
-
+            <p class="cs-subtitle">Daftarkan email kamu untuk mendapat notifikasi pertama saat tiket dirilis!</p>
             <div class="cs-notify-form">
                 <input type="email" class="cs-input" placeholder="email@kamu.com">
                 <button class="btn-cs">
-                    <i class="fas fa-bell"></i> Notifikasi
+                    <i class="fas fa-bell" style="margin-right:6px;"></i> Notifikasi
                 </button>
             </div>
         </div>
     </div>
 </section>
 
+<div class="brands-section">
+    <div class="container">
+        <div class="brands-track">
+            @for($i = 1; $i <= 6; $i++)
+            <div class="brand-item">
+                <img src="{{ asset('essence/img/core-img/brand' . $i . '.png') }}"
+                     alt="Brand {{ $i }}">
+            </div>
+            @endfor
+        </div>
+    </div>
+</div>
 
 <div class="dark-toggle-wrapper">
-    <button id="darkModeToggle" class="btn-dark-toggle">
+    <button id="darkModeToggle" class="btn-dark-toggle" title="Toggle Dark Mode">
         🌙
     </button>
 </div>
-<!-- ================= SCRIPTS ================= -->
-<script src="[unpkg.com](https://unpkg.com/aos@2.3.1/dist/aos.js)"></script>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
 AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
+
 /* ---- PARTICLES ---- */
 (function() {
     const container = document.getElementById('heroParticles');
@@ -1052,52 +1069,78 @@ AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic' });
         container.appendChild(p);
     }
 })();
-/* ---- COUNTDOWN ---- */
-@if($heroEvent)
-(function() {
-    const eventDate = new Date("{{ $heroEvent->date }}").getTime();
-    const els = {
-        days:    document.getElementById('cd-days'),
-        hours:   document.getElementById('cd-hours'),
-        minutes: document.getElementById('cd-minutes'),
-        seconds: document.getElementById('cd-seconds'),
-    };
-    const wrap = document.getElementById('countdownWrap');
-    function pad(n) { return n < 10 ? '0' + n : n; }
-    function update() {
-        const distance = eventDate - Date.now();
-        if (distance <= 0) {
-            if (wrap) wrap.innerHTML = '<div class="countdown-box" style="min-width:200px"><span class="num" style="font-size:1.2rem">🎉 Sedang Berlangsung!</span></div>';
-            return;
-        }
-        els.days.textContent    = pad(Math.floor(distance / 86400000));
-        els.hours.textContent   = pad(Math.floor((distance % 86400000) / 3600000));
-        els.minutes.textContent = pad(Math.floor((distance % 3600000)  / 60000));
-        els.seconds.textContent = pad(Math.floor((distance % 60000)    / 1000));
+
+/* ---- HERO SLIDER ---- */
+const heroEvents = @json($heroEvents);
+
+(function () {
+    if (!heroEvents || heroEvents.length === 0) return;
+
+    let i = 0;
+    const bg = document.getElementById('heroBg');
+    const title = document.querySelector('.hero-title');
+    const locationText = document.querySelector('.hero-location');
+    const btn = document.getElementById('heroBtn');
+
+    function setHero(index) {
+        const e = heroEvents[index];
+        bg.style.backgroundImage = `url('${e.image ?? '/essence/img/bg-img/konser1.jpg'}')`;
+        title.textContent = e.name;
+        locationText.innerHTML = `<i class="fas fa-map-marker-alt" style="color:#f59e0b;margin-right:6px;"></i>${e.location}`;
+        btn.href = `/event/${e.id}`;
     }
-    update();
-    setInterval(update, 1000);
+
+    function next() {
+        i = (i + 1) % heroEvents.length;
+        setHero(i);
+    }
+
+    function prev() {
+        i = (i - 1 + heroEvents.length) % heroEvents.length;
+        setHero(i);
+    }
+
+    setHero(i);
+    let auto = setInterval(next, 5000);
+
+    document.getElementById('nextHero').onclick = () => {
+        next();
+        resetAuto();
+    };
+
+    document.getElementById('prevHero').onclick = () => {
+        prev();
+        resetAuto();
+    };
+
+    function resetAuto() {
+        clearInterval(auto);
+        auto = setInterval(next, 5000);
+    }
 })();
-@endif
-/* ---- SEARCH ---- */
-document.getElementById('searchEvent').addEventListener('input', function() {
-    const val = this.value.toLowerCase().trim();
-    document.querySelectorAll('.event-card-col').forEach(function(card) {
-        card.style.display = card.innerText.toLowerCase().includes(val) ? '' : 'none';
-    });
+
+/* ---- EVENT CAROUSEL NAVIGATION ---- */
+document.addEventListener('DOMContentLoaded', function () {
+    const track = document.getElementById('eventList');
+    const btnPrev = document.getElementById('scrollEventPrev');
+    const btnNext = document.getElementById('scrollEventNext');
+
+    if (track && btnPrev && btnNext) {
+        btnNext.addEventListener('click', () => {
+            // Dapatkan lebar card yang sedang aktif + gap (24px)
+            const activeCard = track.querySelector('.event-card-col:not([style*="display: none"])');
+            const cardWidth = activeCard ? activeCard.offsetWidth : 300;
+            track.scrollBy({ left: cardWidth + 24, behavior: 'smooth' });
+        });
+
+        btnPrev.addEventListener('click', () => {
+            const activeCard = track.querySelector('.event-card-col:not([style*="display: none"])');
+            const cardWidth = activeCard ? activeCard.offsetWidth : 300;
+            track.scrollBy({ left: -(cardWidth + 24), behavior: 'smooth' });
+        });
+    }
 });
-/* ---- DARK MODE ---- */
-const dmToggle = document.getElementById('darkModeToggle');
-const saved = localStorage.getItem('darkMode');
-if (saved === 'true') {
-    document.body.classList.add('dark-mode');
-    dmToggle.textContent = '☀️';
-}
-dmToggle.addEventListener('click', function() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    this.textContent = isDark ? '☀️' : '🌙';
-    localStorage.setItem('darkMode', isDark);
-});
+
 /* ---- QUOTA BAR ANIMATE ON SCROLL ---- */
 const observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
@@ -1163,7 +1206,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     searchInput.addEventListener('input', applyFilter);
 });
-
-
 </script>
 @endsection

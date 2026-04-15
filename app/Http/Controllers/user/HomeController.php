@@ -13,8 +13,9 @@ class HomeController extends Controller
         $events = Event::latest()->take(8)->get();
         $popularProducts = Event::latest()->take(6)->get();
         $popularProducts = Event::orderBy('created_at', 'desc')->paginate(6);
-        return view('user.home', compact('popularProducts'));
-        return view('user.home', [
+        $heroEvents = Event::latest()->take(5)->get(); // ambil beberapa event buat hero
+
+            return view('user.home', compact('popularProducts', 'heroEvents'));        return view('user.home', [
             'heroTitle'       => 'Live Concert 2026',
             'heroSubtitle'    => 'Don\'t Miss It',
             'popularProducts' => $events, // kita tetap pakai nama ini biar blade gak perlu banyak diubah

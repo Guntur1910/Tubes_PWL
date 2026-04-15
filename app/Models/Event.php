@@ -19,4 +19,10 @@ class Event extends Model
         'category',
         'poster'
     ];
+
+    // FIX: nama harus plural & konsisten
+    public function ticketTypes()
+    {
+        return $this->hasMany(TicketType::class, 'event_id', 'id');
+    }
 }
