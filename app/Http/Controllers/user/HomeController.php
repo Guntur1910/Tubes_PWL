@@ -89,6 +89,8 @@ class HomeController extends Controller
             }
         }
 
-        return redirect()->route('user.tickets')->with('success', 'Pembayaran berhasil! E-tickets telah dikirim ke email Anda.');
+        // Redirect ke halaman payment (QR code) dari transaksi pertama
+        $firstTransaction = $pendingTransactions->first();
+        return redirect()->route('user.payment', $firstTransaction->id);
     }
 }

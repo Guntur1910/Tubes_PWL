@@ -16,11 +16,14 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PaymentController;
 
-
+// Rute root yang aman (mencegah ERR_TOO_MANY_REDIRECTS)
 Route::get('/', function () {
-    return Auth::check()
-        ? redirect()->route('user.home')
-        : redirect()->route('login');
+    if (Auth::check()) {
+        // Jika sudah login, lempar ke home user supaya tidak loop
+        return redirect()->route('user.home');
+    }
+    // Jika belum login, tampilkan halaman login
+    return redirect()->route('login');
 });
 
 
@@ -128,6 +131,10 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
     Route::post('/tickets/join-waiting-list', [App\Http\Controllers\TicketController::class, 'joinWaitingList'])->name('tickets.join-waiting-list');
 
     Route::get('/event/{id}', [EventController::class, 'show'])->name('event');
+
+    // 💳 PAYMENT ROUTES
+    Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('payment');
+    Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('payment.success');
 });
 
 
@@ -142,14 +149,3 @@ Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
 
 Route::get('/admin/scan', [TicketController::class, 'scanPage']);
 Route::post('/admin/scan', [TicketController::class, 'validateTicket']);
-
-Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
-Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
-
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('user.checkout');
-Route::post('/checkout/pay', [CheckoutController::class, 'pay'])->name('user.checkout.pay');
-
-Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('user.payment');
-Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('user.payment.success');
-
-

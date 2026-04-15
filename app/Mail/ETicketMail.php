@@ -34,7 +34,7 @@ class ETicketMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'E Ticket Mail',
+            subject: 'E-Ticket Anda - ' . $this->transaction->event->name,
         );
     }
 
@@ -44,7 +44,7 @@ class ETicketMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.eticket',
         );
     }
 
@@ -55,6 +55,17 @@ class ETicketMail extends Mailable
      */
     public function attachments(): array
     {
+        $qrPath = public_path('qrcodes/qr_' . $this->transaction->id . '.png');
+        
+        if (file_exists($qrPath)) {
+            return [
+                Attachment::fromPath($qrPath)
+                    ->as('qr-code.png')
+                    ->withMime('image/png')
+                    ->id('qrcode'),
+            ];
+        }
+        
         return [];
     }
 }

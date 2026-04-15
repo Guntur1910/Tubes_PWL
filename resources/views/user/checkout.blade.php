@@ -14,7 +14,7 @@
                         <h5>Billing Address</h5>
                     </div>
 
-                    <form action="{{ route('user.checkout.process') }}" method="post" id="essenceCheckoutForm" @if($cart->count() === 0) disabled @endif>
+                    <form action="{{ route('user.checkout.pay') }}" method="post" id="essenceCheckoutForm" @if($cart->count() === 0) disabled @endif>
                         @csrf
                         <input type="hidden" name="payment_method" value="QRIS">
                         <div class="row">
