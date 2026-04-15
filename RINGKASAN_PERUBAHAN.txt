@@ -1,0 +1,173 @@
+RINGKASAN PERUBAHAN KODE DAN DATABASE
+Proyek: Tubes_PWL
+Tanggal: April 14, 2026
+
+================================================================================
+1. DATABASE MIGRATIONS
+================================================================================
+
+- Tambahan kolom pada tabel ticket_type:
+  - event_id (foreign key ke events)
+  - name
+  - description
+  - price
+  - quota
+  - sold
+  - sales_start
+  - sales_end
+
+- Pembaruan tabel transactions:
+  - ditambahkan ticket_type_id (foreign key ke ticket_type)
+  - status enum disesuaikan menjadi ['pending','paid','failed']
+  - data transaksi pending digunakan sebagai keranjang
+
+- Tabel tickets:
+  - ditambahkan migration baru untuk tabel tickets dengan kolom:
+    transaction_id, ticket_code, qr_code_path, status, used_at, timestamps
+  - jika tabel sudah ada, migration ini menjaga agar tidak mengulang pembuatan tabel
+
+- Tabel waiting_lists:
+  - ditambahkan migration baru untuk waiting list dengan kolom:
+    user_id, ticket_type_id, quantity, status, notified_at, expires_at, timestamps
+  - migration diperbaiki agar aman jika tabel waiting_lists sudah ada
+
+================================================================================
+2. MODELS
+================================================================================
+
+- app/Models/Event.php
+  - ditambahkan relasi ticketTypes()
+  - ditambahkan relasi transactions()
+
+- app/Models/TicketType.php
+  - disesuaikan nama primary key menjadi id
+  - ditambahkan fillable: event_id, name, description, price, quota, sold, sales_start, sales_end
+  - ditambahkan relasi waitingLists()
+
+- app/Models/Transaction.php
+  - ditambahkan relasi tickets()
+  - fillable: user_id, event_id, ticket_type_id, quantity, total_amount, status
+
+- app/Models/Ticket.php
+  - disesuaikan fillable: transaction_id, ticket_code, qr_code_path, status, used_at
+  - ditambahkan relasi transaction(), user(), event(), ticketType()
+  - ditambahkan helper markAsUsed() dan generateTicketCode()
+
+- app/Models/WaitingList.php
+  - disesuaikan fillable: user_id, ticket_type_id, quantity, status, notified_at, expires_at
+  - ditambahkan relasi user() dan ticketType()
+  - ditambahkan helper status management
+
+================================================================================
+3. CONTROLLERS
+================================================================================
+
+- app/Http/Controllers/EventController.php
+  - show() menampilkan event dengan ticketTypes
+  - buyTicket() memproses add to cart dengan status pending
+  - updateQuantity() endpoint AJAX untuk ubah quantity keranjang
+  - deleteFromCart() endpoint untuk hapus item keranjang
+
+- app/Http/Controllers/User/HomeController.php
+  - checkout() menampilkan cart berdasarkan status pending
+  - payCheckout() memproses pembayaran QRIS, mengubah status ke paid,
+    kemudian generate ticket dan kirim email
+
+- app/Http/Controllers/TicketController.php
+  - __construct() memakai middleware auth
+  - generateTickets() membuat tiket individual dan QR code
+  - myTickets() menampilkan tiket user
+  - scanPage() menampilkan halaman scan ticket admin
+  - validateTicket() memvalidasi kode tiket dan menandai sebagai used
+  - joinWaitingList() menambahkan user ke waiting list jika stok habis
+  - sendTicketEmail() mengirim email dengan lampiran QR code
+
+- app/Http/Controllers/Controller.php
+  - diubah agar extends Illuminate\Routing\Controller dan memakai trait standar
+    AuthorizesRequests, DispatchesJobs, ValidatesRequests
+
+================================================================================
+4. ROUTES
+================================================================================
+
+- routes/web.php
+  - ditambahkan route checkout dan cart untuk user:
+    POST /user/event/buy -> checkout.process
+    POST /user/checkout/pay -> checkout.pay
+    POST /user/cart/{transaction}/update-quantity -> cart.update-quantity
+    DELETE /user/cart/{transaction}/delete -> cart.delete
+  - ditambahkan user ticket routes:
+    GET /user/tickets -> user.tickets
+    POST /user/tickets/generate/{transaction} -> user.tickets.generate
+    POST /user/tickets/join-waiting-list -> user.tickets.join-waiting-list
+  - ditambahkan admin scan ticket routes:
+    GET /admin/scan-ticket -> admin.scan-ticket
+    POST /admin/validate-ticket -> admin.validate-ticket
+
+================================================================================
+5. VIEWS
+================================================================================
+
+- resources/views/user/product-detail.blade.php
+  - dibuat ticket selection card-based
+  - pilih kategori tiket, quantity, perhitungan total otomatis
+  - tombol add to cart dengan validasi pilihan tiket
+  - tombol waiting list muncul jika stok habis
+
+- resources/views/user/checkout.blade.php
+  - checkout form lengkap dengan validasi client-side
+  - QRIS-only payment interface dengan label "Bayar dengan QRIS"
+  - keranjang menampilkan list item, update quantity, delete item
+  - total order dan alert keranjang kosong
+  - field Company dihapus sesuai permintaan
+
+- resources/views/user/tickets.blade.php
+  - tampilan e-ticket user
+  - tombol generate e-ticket jika belum ada QR code
+  - preview QR code dan badge status ticket
+  - download QR code
+
+- resources/views/admin/scan-ticket.blade.php
+  - halaman scan ticket untuk scan simulation
+  - support manual input dan camera QR scan
+  - AJAX validate ticket ke backend
+
+- resources/views/emails/ticket.blade.php
+  - template email e-ticket dengan informasi event
+  - lampiran QR code dan instruksi penggunaan ticket
+
+================================================================================
+6. PACKAGE & LIBRARY
+================================================================================
+
+- composer require endroid/qr-code
+  - digunakan untuk generate QR Code ticket
+
+================================================================================
+7. FITUR UTAMA YANG TERPASANG
+================================================================================
+
+- Simulasi pembayaran QRIS only
+- Status transaksi: pending, paid, failed
+- Pemilihan jenis tiket (VIP/Regular/dll)
+- Manajemen stok otomatis berdasarkan quota dan sold
+- Generate e-ticket QR code otomatis
+- Validasi tiket dengan scan simulation
+- Waiting list jika stok habis
+- Pengiriman QR ticket via email
+
+================================================================================
+8. PERBAIKAN KESALAHAN PENTING
+================================================================================
+
+- Fix middleware error `TicketController::middleware()` dengan memperbaiki base Controller
+- Fix route name `tickets.generate` menjadi `user.tickets.generate`
+- Fix database schema `tickets` agar memiliki kolom transaction_id, ticket_code, qr_code_path, status, used_at
+- Remove field Company dari checkout form
+
+================================================================================
+CATATAN TAMBAHAN
+================================================================================
+
+- Semua perubahan dibuat agar sesuai alur capstone project:
+  Pemesanan tiket -> Pembayaran QRIS -> Generate e-ticket -> Kirim email -> Scan validasi tiket.
