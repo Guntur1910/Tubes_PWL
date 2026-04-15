@@ -775,20 +775,29 @@ body.dark-mode .section-tag {
 @php $heroEvent = $popularProducts->first(); @endphp
 <!-- ================= HERO ================= -->
 <section class="hero-section">
-    <div class="hero-bg"></div>
-    <div class="hero-overlay"></div>
-    <!-- Floating particles -->
-    <div class="hero-particles" id="heroParticles"></div>
-    <div class="hero-content">
-        @if($heroEvent)
+
+    @if($heroEvents->count())
+
+        {{-- BACKGROUND IMAGE --}}
+        <div class="hero-bg"
+             style="background-image: url('{{ asset('storage/' . $heroEvents[0]->poster) }}')">
+        </div>
+
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content text-center">
+
             <div class="hero-badge">
-                <i class="fas fa-fire"></i>
-                Event Terpopuler &bull; {{ \Carbon\Carbon::parse($heroEvent->date)->format('d M Y') }}
+                🔥 Event Terpopuler
             </div>
-            <h1 class="hero-title">{{ $heroEvent->name }}</h1>
+
+            <h1 class="hero-title">
+                {{ $heroEvents[0]->name }}
+            </h1>
+
             <p class="hero-location">
-                <i class="fas fa-map-marker-alt" style="color: #f59e0b; margin-right:6px;"></i>
-                {{ $heroEvent->location }}
+                <i class="fas fa-map-marker-alt"></i>
+                {{ $heroEvents[0]->location }}
             </p>
             <div class="hero-countdown" id="countdownWrap">
                 <div class="countdown-box">
@@ -809,116 +818,182 @@ body.dark-mode .section-tag {
                 </div>
             </div>
             <div class="hero-actions">
-                <a href="{{ route('user.event', $heroEvent->id) }}" class="btn-hero-primary">
-                    <span><i class="fas fa-ticket-alt"></i> Beli Tiket Sekarang</span>
+                <a href="{{ route('user.event', $heroEvents[0]->id) }}"
+                   class="btn-hero-primary">
+                    🎫 Beli Tiket
                 </a>
                 <a href="#events" class="btn-hero-outline">
-                    <i class="fas fa-compass"></i> Jelajahi Event
+                    Jelajahi Event
                 </a>
             </div>
-        @else
-            <div class="hero-badge"><i class="fas fa-clock"></i> Stay Tuned</div>
-            <h1 class="hero-title">Event Spektakuler<br>Segera Hadir</h1>
-            <p class="hero-location">Nantikan pengalaman konser terbaik untukmu</p>
-        @endif
-    </div>
-    <div class="hero-scroll">
-        <span>Scroll</span>
-    </div>
+
+        </div>
+
+    @else
+
+        <div class="hero-content text-center">
+            <h1 class="hero-title">Event Segera Hadir</h1>
+        </div>
+
+    @endif
+
 </section>
-<!-- ================= SEARCH ================= -->
+
+
 <section class="search-section" id="events">
     <div class="container">
         <div class="search-wrapper">
-            <i class="fa fa-search" aria-hidden="true"></i>
+            <i class="fa fa-search"></i>
             <input type="text" id="searchEvent" class="search-input"
                    placeholder="Cari nama event, lokasi...">
         </div>
     </div>
 </section>
-<!-- ================= EVENTS ================= -->
+
+
 <section class="events-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
             <div class="section-tag">🔥 Populer</div>
             <h2 class="section-title">Event yang Sedang Hits</h2>
-            <p class="section-subtitle">Temukan pengalaman konser tak terlupakan dan pesan tiketmu sekarang</p>
+            <p class="section-subtitle">
+                Temukan pengalaman konser tak terlupakan dan pesan tiketmu sekarang
+            </p>
         </div>
-        <div class="filter-tabs" data-aos="fade-up" data-aos-delay="100">
-            <button class="filter-tab active">Semua</button>
-            <button class="filter-tab">Konser</button>
-            <button class="filter-tab">Festival</button>
-            <button class="filter-tab">Theater</button>
+
+        {{-- FILTER CATEGORY --}}
+        <div class="filter-tabs" data-aos="fade-up">
+            <button class="filter-tab active" data-category="all">Semua</button>
+            <button class="filter-tab" data-category="konser">Konser</button>
+            <button class="filter-tab" data-category="festival">Festival</button>
+            <button class="filter-tab" data-category="theater">Theater</button>
         </div>
-        <div class="row g-4" id="eventList">
-            @forelse($popularProducts as $event)
-            <div class="col-lg-4 col-md-6 event-card-col" data-aos="fade-up" data-aos-delay="{{ $loop->index * 80 }}">
-                <div class="event-card">
-                    <div class="event-card-inner">
-                        <div class="card-img-wrapper">
-                            <img src="{{ $event->image ?? asset('essence/img/bg-img/konser2.jpg') }}"
-                                 class="card-img-cover"
-                                 alt="{{ $event->name }}"
-                                 loading="lazy">
-                            <div class="card-img-overlay-gradient"></div>
-                            <div class="card-date-chip">
-                                <i class="fas fa-calendar-alt"></i>
-                                {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}
-                            </div>
-                            @if($event->quota <= 0)
-                                <div class="card-badge badge-sold">Sold Out</div>
-                            @elseif($event->quota <= 20)
-                                <div class="card-badge badge-hot">🔥 Hampir Habis</div>
-                            @endif
-                            <div class="card-price-tag">
-                                Rp {{ number_format($event->price, 0, ',', '.') }}
-                            </div>
-                        </div>
-                        <div class="event-card-body">
-                            <h5 class="event-card-title">{{ $event->name }}</h5>
-                            <div class="event-card-meta">
-                                <div class="event-meta-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>{{ $event->location }}</span>
+
+        <div class="event-carousel-wrapper" data-aos="fade-up">
+
+            <button class="carousel-action-btn btn-prev-event" id="scrollEventPrev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <button class="carousel-action-btn btn-next-event" id="scrollEventNext">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div class="event-carousel-track" id="eventList">
+
+                @forelse($popularProducts as $event)
+
+                <div class="event-card-col"
+                     data-category="{{ strtolower($event->category ?? 'all') }}">
+
+                    <div class="event-card">
+                        <div class="event-card-inner">
+
+                            {{-- 🔥 IMAGE --}}
+                            <div class="card-img-wrapper">
+
+                                <img
+                                    src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('essence/img/bg-img/konser2.jpg') }}"
+                                    class="card-img-cover"
+                                    alt="{{ $event->name }}"
+                                    loading="lazy">
+
+                                <div class="card-img-overlay-gradient"></div>
+
+                                {{-- DATE --}}
+                                <div class="card-date-chip">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}
                                 </div>
-                                <div class="event-meta-item">
-                                    <i class="fas fa-ticket-alt"></i>
-                                    <span>{{ $event->quota > 0 ? $event->quota . ' tiket tersisa' : 'Tiket habis' }}</span>
+
+                                {{-- BADGE --}}
+                                @if($event->quota <= 0)
+                                    <div class="card-badge badge-sold">Sold Out</div>
+                                @elseif($event->quota <= 20)
+                                    <div class="card-badge badge-hot">🔥 Hampir Habis</div>
+                                @endif
+
+                                {{-- PRICE --}}
+                                <div class="card-price-tag">
+                                    Rp {{ number_format($event->price, 0, ',', '.') }}
                                 </div>
                             </div>
-                            @php
-                                $maxQuota = 100;
-                                $percentage = $event->quota > 0 ? min(100, ($event->quota / $maxQuota) * 100) : 0;
-                                $quotaColor = $event->quota <= 0 ? '#ef4444' : ($event->quota <= 20 ? '#f59e0b' : 'linear-gradient(90deg, #a78bfa, #7c3aed)');
-                            @endphp
-                            <div class="quota-wrapper">
-                                <div class="quota-label">
-                                    <span>Ketersediaan Tiket</span>
-                                    <span>{{ $percentage }}%</span>
+
+                            {{-- BODY --}}
+                            <div class="event-card-body">
+
+                                <h5 class="event-card-title">
+                                    {{ $event->name }}
+                                </h5>
+
+                                <div class="event-card-meta">
+
+                                    <div class="event-meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ $event->location }}</span>
+                                    </div>
+
+                                    <div class="event-meta-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span>{{ ucfirst($event->category) }}</span>
+                                    </div>
+
+                                    <div class="event-meta-item">
+                                        <i class="fas fa-ticket-alt"></i>
+                                        <span>
+                                            {{ $event->quota > 0 ? $event->quota . ' tiket tersisa' : 'Tiket habis' }}
+                                        </span>
+                                    </div>
+
                                 </div>
-                                <div class="quota-bar">
-                                    <div class="quota-fill" style="width: {{ $percentage }}%;
-                                        @if($event->quota <= 0) background: #ef4444;
-                                        @elseif($event->quota <= 20) background: linear-gradient(90deg, #fbbf24, #f59e0b);
-                                        @endif">
+
+                                {{-- PROGRESS BAR --}}
+                                @php
+                                    $maxQuota = 100;
+                                    $percentage = $event->quota > 0 ? min(100, ($event->quota / $maxQuota) * 100) : 0;
+                                @endphp
+
+                                <div class="quota-wrapper">
+                                    <div class="quota-label">
+                                        <span>Ketersediaan</span>
+                                        <span>{{ round($percentage) }}%</span>
+                                    </div>
+
+                                    <div class="quota-bar">
+                                        <div class="quota-fill"
+                                             style="width: {{ $percentage }}%;
+                                             @if($event->quota <= 0)
+                                                background: #ef4444;
+                                             @elseif($event->quota <= 20)
+                                                background: linear-gradient(90deg,#fbbf24,#f59e0b);
+                                             @endif">
+                                        </div>
                                     </div>
                                 </div>
+
+                                {{-- BUTTON --}}
+                                <a href="{{ route('user.event', $event->id) }}"
+                                   class="btn-card">
+                                    <i class="fas fa-arrow-right"></i>
+                                    Lihat Detail
+                                </a>
+
                             </div>
-                            <a href="{{ route('user.event', $event->id) }}" class="btn-card">
-                                <i class="fas fa-arrow-right"></i>
-                                Lihat Detail &amp; Pesan
-                            </a>
+
                         </div>
                     </div>
                 </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <div class="empty-state" data-aos="fade-up">
+
+                @empty
+
+                <div class="empty-state">
                     <i class="fas fa-calendar-times"></i>
                     <h5>Belum ada event tersedia</h5>
-                    <p>Event baru akan segera ditambahkan, stay tuned!</p>
+                    <p>Event baru akan segera ditambahkan</p>
                 </div>
+
+                @endforelse
+
             </div>
             @endforelse
         </div>
@@ -927,40 +1002,30 @@ body.dark-mode .section-tag {
         </div>
     </div>
 </section>
-<!-- ================= COMING SOON ================= -->
-<section class="coming-soon-section">
-    <div class="cs-glow cs-glow-1"></div>
-    <div class="cs-glow cs-glow-2"></div>
+
+
+<section class="coming-soon-section pt-5 pb-5">
     <div class="container">
         <div class="cs-content" data-aos="fade-up">
             <div class="cs-icon">🎶</div>
             <h3 class="cs-title">Event Berikutnya Sudah Dekat</h3>
-            <p class="cs-subtitle">Daftarkan email kamu untuk mendapat notifikasi pertama saat tiket dirilis!</p>
+            <p class="cs-subtitle">
+                Daftarkan email kamu untuk mendapat notifikasi
+            </p>
+
             <div class="cs-notify-form">
                 <input type="email" class="cs-input" placeholder="email@kamu.com">
                 <button class="btn-cs">
-                    <i class="fas fa-bell" style="margin-right:6px;"></i> Notifikasi
+                    <i class="fas fa-bell"></i> Notifikasi
                 </button>
             </div>
         </div>
     </div>
 </section>
-<!-- ================= BRANDS ================= -->
-<div class="brands-section">
-    <div class="container">
-        <div class="brands-track">
-            @for($i = 1; $i <= 6; $i++)
-            <div class="brand-item">
-                <img src="{{ asset('essence/img/core-img/brand' . $i . '.png') }}"
-                     alt="Brand {{ $i }}">
-            </div>
-            @endfor
-        </div>
-    </div>
-</div>
-<!-- ================= DARK MODE TOGGLE ================= -->
+
+
 <div class="dark-toggle-wrapper">
-    <button id="darkModeToggle" class="btn-dark-toggle" title="Toggle Dark Mode">
+    <button id="darkModeToggle" class="btn-dark-toggle">
         🌙
     </button>
 </div>
@@ -1046,5 +1111,59 @@ document.querySelectorAll('.quota-fill').forEach(function(bar) {
     bar.style.width = '0%';
     observer.observe(bar);
 });
+
+/* ---- DARK MODE ---- */
+const dmToggle = document.getElementById('darkModeToggle');
+const saved = localStorage.getItem('darkMode');
+if (saved === 'true') {
+    document.body.classList.add('dark-mode');
+    dmToggle.textContent = '☀️';
+}
+dmToggle.addEventListener('click', function() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    this.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('darkMode', isDark);
+});
+
+/* ---- FILTER & SEARCH LOGIC ---- */
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.event-card-col');
+    const searchInput = document.getElementById('searchEvent');
+
+    let currentCategory = 'all';
+
+    function applyFilter() {
+        const keyword = searchInput.value.toLowerCase().trim();
+
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const category = card.dataset.category ? card.dataset.category.toLowerCase() : 'all';
+
+            const matchSearch = text.includes(keyword);
+            const matchCategory = (currentCategory === 'all' || category === currentCategory);
+
+            if (matchSearch && matchCategory) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    tabs.forEach(button => {
+        button.addEventListener('click', function () {
+            document.querySelector('.filter-tab.active')?.classList.remove('active');
+            this.classList.add('active');
+
+            currentCategory = this.dataset.category.toLowerCase();
+            applyFilter();
+        });
+    });
+
+    searchInput.addEventListener('input', applyFilter);
+});
+
+
 </script>
 @endsection
