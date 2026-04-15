@@ -16,22 +16,20 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PaymentController;
 
-// Rute root yang aman (mencegah ERR_TOO_MANY_REDIRECTS)
+// ==========================
+// ROOT ROUTE
+// ==========================
 Route::get('/', function () {
     if (Auth::check()) {
-        // Jika sudah login, lempar ke home user supaya tidak loop
         return redirect()->route('user.home');
     }
-    // Jika belum login, tampilkan halaman login
     return redirect()->route('login');
 });
 
-
 // ==========================
-// AUTH ROUTES
+// AUTH ROUTES (GUEST)
 // ==========================
 Route::middleware('guest')->group(function () {
-
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 
@@ -42,46 +40,70 @@ Route::middleware('guest')->group(function () {
     Route::post('/admin/register', [AdminRegisterController::class, 'register']);
 });
 
-
 // ==========================
-// LOGOUT
+// AUTH ROUTES (LOGGED IN)
 // ==========================
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-});
 
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+});
 
 // ==========================
 // ADMIN ROUTES
 // ==========================
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
     Route::resource('events', AdminEventController::class);
 
-    // 🎫 SCAN TICKET ROUTES
-    Route::get('/scan-ticket', [App\Http\Controllers\TicketController::class, 'scanPage'])->name('scan-ticket');
-    Route::post('/validate-ticket', [App\Http\Controllers\TicketController::class, 'validateTicket'])->name('validate-ticket');
-
+    // Scan Ticket
+    Route::get('/scan-ticket', [TicketController::class, 'scanPage'])->name('scan-ticket');
+    Route::post('/validate-ticket', [TicketController::class, 'validateTicket'])->name('validate-ticket');
 });
 
+// ==========================
+// ORGANIZER ROUTES (FIXED & CLEAN)
+// ==========================
+Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
+    // Ini WAJIB ke Controller supaya $totalRevenue terisi
+    Route::get('/dashboard', [OrganizerDashboardController::class, 'index'])->name('dashboard');
+    
+    // Resource Event untuk Organizer
+    Route::resource('events', EventController::class);
+});
 
 // ==========================
 // USER ROUTES
 // ==========================
 Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
-
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [HomeController::class, 'shop'])->name('shop');
     Route::get('/blog', [HomeController::class, 'blog'])->name('blog');
     Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
     Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
-
-    // ✅ EVENT DETAIL
+    
+    // Event Detail
     Route::get('/event/{id}', [EventController::class, 'show'])->name('event');
+    
+    // Cart & Process
+    Route::post('/event/buy', [EventController::class, 'buyTicket'])->name('checkout.process');
+    Route::post('/checkout/pay', [HomeController::class, 'payCheckout'])->name('checkout.pay');
+    Route::post('/cart/{transaction}/update-quantity', [EventController::class, 'updateQuantity'])->name('cart.update-quantity');
+    Route::delete('/cart/{transaction}/delete', [EventController::class, 'deleteFromCart'])->name('cart.delete');
 
+    // Tickets
+    Route::get('/tickets', [TicketController::class, 'myTickets'])->name('tickets');
+    Route::post('/tickets/generate/{transaction}', [TicketController::class, 'generate'])->name('tickets.generate');
+    Route::post('/tickets/join-waiting-list', [TicketController::class, 'joinWaitingList'])->name('tickets.join-waiting-list');
+
+    // Payment
+    Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('payment');
+    Route::post('/payment/{id}/success', [PaymentController::class, 'success'])->name('payment.success');
 });
 
 
@@ -89,16 +111,14 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
 // PROFILE ROUTES
 // ==========================
 Route::middleware('auth')->group(function () {
-
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-
 });
 
 
 
-Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')->group(function () {
+Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
 
         Route::get('/dashboard', [OrganizerDashboardController::class, 'index'])
             ->name('dashboard');
@@ -139,7 +159,6 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function () {
 
 
 Route::get('/transaction/paid/{id}', [TransactionController::class, 'markAsPaid']);
-
 
 // ========================== QR TICKET  VALIDATION ==========================
 Route::post('/tickets/generate/{transaction}', [TicketController::class, 'generate'])

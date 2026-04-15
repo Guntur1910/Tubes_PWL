@@ -4,41 +4,57 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Models\Transaction;
+use App\Models\Transaction; // Sesuaikan dengan nama model transaksi kamu
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrganizerDashboardController extends Controller
 {
     public function index()
     {
-        $organizerId = auth::id();
+        $userId = Auth::id();
 
-        // Event milik organizer
-        $events = \App\Models\Event::where('organizer_id', $organizerId)->get();
+        // 1. Statistik Utama
+        $totalEvents = Event::where('organizer_id', $userId)->count();
+        
+        // Menghitung total tiket terjual dari event milik organizer ini
+        $totalTicket = Transaction::whereHas('event', function($query) use ($userId) {
+            $query->where('organizer_id', $userId);
+        })->where('status', 'paid')->sum('quantity');
 
-        $eventIds = $events->pluck('id');
+        // Menghitung total revenue
+        $totalRevenue = Transaction::whereHas('event', function($query) use ($userId) {
+            $query->where('organizer_id', $userId);
+        })->where('status', 'paid')->sum('total_amount');
 
-        $totalEvents = $events->count();
-
-        $totalRevenue = \App\Models\Transaction::whereIn('event_id', $eventIds)
+        // 2. Data untuk Grafik Transaksi (7 Hari Terakhir)
+        $chartData = Transaction::whereHas('event', function($query) use ($userId) {
+                $query->where('organizer_id', $userId);
+            })
             ->where('status', 'paid')
-            ->sum('total_amount');
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->take(7)
+            ->get();
 
-        $totalTicket = \App\Models\Transaction::whereIn('event_id', $eventIds)
-            ->where('status', 'paid')
-            ->sum('quantity');
-
-        $latestTransactions = \App\Models\Transaction::whereIn('event_id', $eventIds)
-            ->latest()
-            ->take(5)
+        // 3. Event Performance (Analitik per Event)
+        $events = Event::where('organizer_id', $userId)
+            ->withCount(['transactions as tickets_sold' => function($query) {
+                $query->where('status', 'paid')->select(DB::raw('sum(quantity)'));
+            }])
+            ->withSum(['transactions as revenue' => function($query) {
+                $query->where('status', 'paid');
+            }], 'total_amount')
             ->get();
 
         return view('organizer.dashboard', compact(
+            'totalEvents', 
+            'totalTicket', 
+            'totalRevenue', 
             'events',
-            'totalEvents',
-            'totalRevenue',
-            'totalTicket',
-            'latestTransactions'
+            'chartData'
         ));
     }
 }
