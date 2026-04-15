@@ -93,10 +93,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::middleware(['auth', 'organizer'])
-    ->prefix('organizer')
-    ->name('organizer.')
-    ->group(function () {
+
 
 Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')->group(function () {
 
