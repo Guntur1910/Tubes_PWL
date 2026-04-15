@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Organizer\OrganizerDashboardController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -50,6 +51,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::resource('events', AdminEventController::class);
 
 });
 
@@ -82,10 +85,13 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('dashboard')->group(function () {
+Route::middleware(['auth', 'organizer'])
+    ->prefix('organizer')
+    ->name('organizer.')
+    ->group(function () {
 
         Route::get('/dashboard', [OrganizerDashboardController::class, 'index'])
-            ->name('organizer.dashboard');
+            ->name('dashboard');
 
         Route::resource('events', EventController::class);
 });
