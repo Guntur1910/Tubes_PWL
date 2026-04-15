@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+
 use App\Models\Transaction;
 use App\Models\Ticket;
 use App\Models\WaitingList;
@@ -21,33 +24,41 @@ class TicketController extends Controller
         $this->middleware('auth');
     }
 
-    // Generate tickets setelah pembayaran berhasil
+    // =========================
+    // GENERATE TICKETS + QR
+    // =========================
     public function generateTickets(Transaction $transaction)
     {
-        // Pastikan transaction milik user dan status paid
         if ($transaction->user_id !== Auth::id() || $transaction->status !== 'paid') {
             abort(403);
         }
 
-        // Cek apakah tickets sudah pernah di-generate
         if ($transaction->tickets()->count() > 0) {
-            return redirect()->route('user.tickets')->with('info', 'Tickets sudah di-generate sebelumnya');
+            return redirect()->route('user.tickets')
+                ->with('info', 'Tickets sudah pernah di-generate');
         }
 
-        // Generate individual tickets berdasarkan quantity
-        for ($i = 0; $i < $transaction->quantity; $i++) {
-            $ticketCode = 'TKT-' . strtoupper(substr(md5(uniqid($transaction->id . $i)), 0, 8));
+        $qty = $transaction->quantity;
 
-            // Generate QR Code
-            $qrCode = new QrCode($ticketCode);
+        for ($i = 0; $i < $qty; $i++) {
+
+            // ✅ generate code unik
+            do {
+                $ticketCode = 'TKT-' . strtoupper(Str::random(8));
+            } while (Ticket::where('ticket_code', $ticketCode)->exists());
+
+            $qrData = $ticketCode;
+
+            // 🔥 FIX QR (PALING AMAN)
+            $qrCode = new QrCode($qrData);
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
 
-            // Simpan QR code ke storage
+            // simpan file
             $qrPath = 'qr-codes/' . $ticketCode . '.png';
             Storage::disk('public')->put($qrPath, $result->getString());
 
-            // Buat ticket record
+            // simpan DB
             Ticket::create([
                 'transaction_id' => $transaction->id,
                 'ticket_code' => $ticketCode,
@@ -56,129 +67,138 @@ class TicketController extends Controller
             ]);
         }
 
-        // Kirim email dengan tickets
         $this->sendTicketEmail($transaction);
 
-        return redirect()->route('user.tickets')->with('success', 'E-tickets berhasil di-generate dan dikirim ke email Anda');
+        return redirect()->route('user.tickets')
+            ->with('success', 'E-ticket berhasil dibuat!');
     }
 
-    // Tampilkan semua tickets user
+    // =========================
+    // LIST TICKETS USER
+    // =========================
     public function myTickets()
     {
         $transactions = Transaction::where('user_id', Auth::id())
             ->where('status', 'paid')
             ->with(['event', 'ticketType', 'tickets'])
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->get();
 
         return view('user.tickets', compact('transactions'));
     }
 
-    // Halaman scan tiket (untuk admin/organizer)
+    // =========================
+    // SCAN PAGE
+    // =========================
     public function scanPage()
     {
         return view('admin.scan-ticket');
     }
 
-    // Validasi tiket via AJAX (scan simulation)
+    // =========================
+    // VALIDATE TICKET
+    // =========================
     public function validateTicket(Request $request)
     {
-        $request->validate([
-            'ticket_code' => 'required|string'
-        ]);
+    $request->validate([
+        'ticket_code' => 'required|string'
+    ]);
 
-        $ticket = Ticket::where('ticket_code', $request->ticket_code)
-            ->with(['transaction.event', 'transaction.ticketType'])
-            ->first();
+    $ticket = Ticket::where('ticket_code', $request->ticket_code)->first();
 
-        if (!$ticket) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Tiket tidak ditemukan'
-            ]);
-        }
-
-        if ($ticket->status === 'used') {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Tiket sudah digunakan pada ' . $ticket->used_at->format('d/m/Y H:i'),
-                'ticket' => $ticket
-            ]);
-        }
-
-        if ($ticket->status === 'cancelled') {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Tiket telah dibatalkan',
-                'ticket' => $ticket
-            ]);
-        }
-
-        // Mark as used
-        $ticket->markAsUsed();
-
+    // ❌ tiket tidak ditemukan
+    if (!$ticket) {
         return response()->json([
-            'valid' => true,
-            'message' => 'Tiket valid! Selamat menikmati event.',
-            'ticket' => $ticket
+            'valid' => false,
+            'message' => 'Tiket tidak ditemukan'
         ]);
     }
 
-    // Join waiting list
+    // ❌ sudah dipakai
+    if ($ticket->status === 'used') {
+        return response()->json([
+            'valid' => false,
+            'message' => 'Tiket sudah digunakan pada ' . $ticket->used_at
+        ]);
+    }
+
+    // ❌ dibatalkan
+    if ($ticket->status === 'cancelled') {
+        return response()->json([
+            'valid' => false,
+            'message' => 'Tiket dibatalkan'
+        ]);
+    }
+
+    // ✅ VALID → ubah status
+    $ticket->status = 'used';
+    $ticket->used_at = now();
+    $ticket->save();
+
+    return response()->json([
+        'valid' => true,
+        'message' => 'Tiket valid ✅',
+        'ticket' => $ticket
+    ]);
+}
+
+    // =========================
+    // WAITING LIST
+    // =========================
     public function joinWaitingList(Request $request)
     {
         $request->validate([
-            'ticket_type_id' => 'required|exists:ticket_type,id',
+            'ticket_type_id' => 'required|exists:ticket_types,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
         $ticketType = TicketType::findOrFail($request->ticket_type_id);
 
-        // Cek apakah masih ada quota
-        $availableQuota = $ticketType->quota - $ticketType->sold;
-        if ($availableQuota >= $request->quantity) {
+        $available = $ticketType->quota - $ticketType->sold;
+
+        if ($available >= $request->quantity) {
             return response()->json([
                 'success' => false,
-                'message' => 'Masih ada tiket tersedia, silakan langsung beli'
+                'message' => 'Tiket masih tersedia'
             ]);
         }
 
-        // Cek apakah user sudah join waiting list untuk ticket type ini
-        $existingWaitingList = WaitingList::where('user_id', Auth::id())
+        $exists = WaitingList::where('user_id', Auth::id())
             ->where('ticket_type_id', $request->ticket_type_id)
             ->where('status', 'waiting')
             ->first();
 
-        if ($existingWaitingList) {
+        if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda sudah terdaftar dalam waiting list untuk kategori tiket ini'
+                'message' => 'Sudah masuk waiting list'
             ]);
         }
 
-        // Join waiting list
         WaitingList::create([
             'user_id' => Auth::id(),
             'ticket_type_id' => $request->ticket_type_id,
             'quantity' => $request->quantity,
             'status' => 'waiting',
-            'expires_at' => now()->addDays(30) // Expire dalam 30 hari
+            'expires_at' => now()->addDays(30)
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Berhasil bergabung ke waiting list. Anda akan diberitahu jika tiket tersedia.'
+            'message' => 'Berhasil masuk waiting list'
         ]);
     }
 
-    // Kirim email dengan tickets
+    // =========================
+    // EMAIL
+    // =========================
     private function sendTicketEmail(Transaction $transaction)
     {
         try {
-            Mail::to($transaction->user->email)->send(new TicketEmail($transaction));
+            Mail::to($transaction->user->email)
+                ->send(new TicketEmail($transaction));
         } catch (\Exception $e) {
-            // Log error tapi jangan hentikan proses
-            \Log::error('Failed to send ticket email: ' . $e->getMessage());
+            \Log::error('Email gagal: ' . $e->getMessage());
         }
     }
 }

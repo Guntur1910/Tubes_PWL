@@ -16,7 +16,8 @@ class Event extends Model
         'location',
         'quota',
         'price',
-        'organizer_id'
+        'organizer_id',
+        'category'
     ];
 
     public function tickets()

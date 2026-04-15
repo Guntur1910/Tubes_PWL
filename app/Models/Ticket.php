@@ -7,50 +7,43 @@ use Illuminate\Database\Eloquent\Model;
 class Ticket extends Model
 {
     protected $fillable = [
-        'transaction_id', 'ticket_code', 'qr_code_path', 'status', 'used_at'
+        'transaction_id',
+        'ticket_code',
+        'qr_code_path',
+        'status',
+        'used_at'
     ];
 
     protected $casts = [
         'used_at' => 'datetime',
     ];
 
-    // Relasi
+    // =========================
+    // RELATION
+    // =========================
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function event()
-    {
-        return $this->belongsTo(Event::class, 'event_id');
-    }
-
-    public function ticketType()
-    {
-        return $this->belongsTo(TicketType::class, 'ticket_type_id');
-    }
-
-    // Helper methods
+    // =========================
+    // HELPER
+    // =========================
     public function isUsed()
     {
         return $this->status === 'used';
     }
 
+
+
+    public static function generateCode()
+    {
+        return 'TKT-' . strtoupper(\Illuminate\Support\Str::random(8));
+    }
     public function markAsUsed()
     {
-        $this->update([
-            'status' => 'used',
-            'used_at' => now()
-        ]);
-    }
-
-    public function generateTicketCode()
-    {
-        return 'TKT-' . strtoupper(substr(md5(uniqid()), 0, 8));
+        $this->status = 'used';
+        $this->used_at = now();
+        $this->save();
     }
 }
